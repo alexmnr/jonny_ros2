@@ -1,8 +1,23 @@
 # Overview
 Everything you need to controll the fully 3D-printed robotic arm "Jenny" using ros2 and moveit.
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Installation](#installation)
+  - [ROS2](#ros2)
+  - [rosdep](#rosdep)
+  - [Dependencies](#dependencies)
+  - [Build](#build)
+- [Usage](#usage)
+  - [Initialization (once after reboot)](#initialization-once-after-reboot)
+    - [Sourcing the workspace](#sourcing-the-workspace)
+    - [Attaching the can bus to linux](#attaching-the-can-bus-to-linux)
+  - [Launch (every time you want to start the programm)](#launch-every-time-you-want-to-start-the-programm)
+    - [Launch real robot with gui controll](#launch-real-robot-with-gui-controll)
+    - [Launch real robot with command controll](#launch-real-robot-with-command-controll)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Installation
 Follow these instructions to use this repository.
