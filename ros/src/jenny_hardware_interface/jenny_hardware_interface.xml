@@ -1,0 +1,9 @@
+<library path="jenny_hardware_interface">
+  <class name="jenny_hardware_interface/JennyHardwareInterface"
+         type="jenny_hardware_interface::JennyHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware Interface for CAN interface of jenny robot
+    </description>
+  </class>
+</library>

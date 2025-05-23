@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="jenny">
+    <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
+
+    <xacro:arg name="use_fake_hardware" default="false" />
+
+    <!-- Import jenny urdf file -->
+    <xacro:include filename="$(find jenny_robot_description)/urdf/jenny.urdf" />
+
+    <xacro:include filename="jenny.ros2_control.xacro" />
+    <xacro:jenny_ros2_control name="JennyControlSystem" initial_positions_file="$(arg initial_positions_file)" use_fake_hardware="$(arg use_fake_hardware)"/>
+</robot>
