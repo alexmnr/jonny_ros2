@@ -22,7 +22,6 @@
   <depend>rcpputils</depend>
   <depend>realtime_tools</depend>
   <depend>trajectory_msgs</depend>
-  <depend>libserial-dev</depend>
 
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
@@ -33,6 +32,7 @@
   <exec_depend>ros2controlcli</exec_depend>
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>rviz2</exec_depend>
+  <exec_depend>ros2_socketcan</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
