@@ -1,7 +1,8 @@
 # Overview
 Everything you need to controll the fully 3D-printed robotic arm "Jenny" using ros2 and moveit.
 
-${toc}
+<!-- START doctoc -->
+<!-- END doctoc -->
 
 # Installation
 Follow these instructions to use this repository.
