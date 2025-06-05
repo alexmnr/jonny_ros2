@@ -11,6 +11,7 @@ JennyHardwareInterface::on_init(const hardware_interface::HardwareInfo &info) {
   }
 
   rclcpp::Logger logger = rclcpp::get_logger("JennyHardwareInterface");
+  node_ = rclcpp::Node::make_shared("JennyHardwareInterfaceLogger");
 
   // robot has 6 joints and 2 interfaces
   joint_position_.assign(6, 0);
@@ -38,6 +39,9 @@ JennyHardwareInterface::on_init(const hardware_interface::HardwareInfo &info) {
   // thread for receiving can responses
   stop_thread_.store(false);
   can_response_thread_ = std::thread(&JennyHardwareInterface::handleCANResponses, this);
+
+  // Create status publisher
+  pub_ = node_->create_publisher<jenny_interfaces::msg::HardwareStatus>("/hardware_status", 10);
 
   return CallbackReturn::SUCCESS;
 }
@@ -101,6 +105,9 @@ return_type JennyHardwareInterface::read(const rclcpp::Time & /*time*/,
     joint_position_[i] = getJointPosition(i);
   }
 
+  // joint_position_[4] = joint_position_command_[4];
+  // joint_position_[5] = joint_position_command_[5];
+
   // calculate speeds
   calculateMotorVelocities();
 
@@ -115,7 +122,21 @@ return_type JennyHardwareInterface::read(const rclcpp::Time & /*time*/,
   }
 
   // debug:
-  // printJointInfo(1);
+  // printJointInfo(4);
+
+  auto msg = jenny_interfaces::msg::HardwareStatus();
+  msg.stamp = node_->get_clock()->now();
+  msg.status = "Jup";
+  for (int i = 0; i < 4; i++) {
+    auto joint = jenny_interfaces::msg::JointStatus();
+    joint.id = i;
+    joint.set_position = joint_position_command_[i];
+    joint.actual_position = getJointPosition(i);
+    joint.set_velocity = joint_velocities_command_[i];
+    joint.actual_velocity = getJointVelocity(i);
+    msg.joints.push_back(joint);
+  }
+  pub_->publish(msg);
 
   return return_type::OK;
 }
@@ -130,33 +151,33 @@ return_type JennyHardwareInterface::write(const rclcpp::Time &,
     return return_type::OK;
   }
 
-  double diff = 0.0;
+  // double diff = 0.0;
 
   // joint 1-4
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 6; i++) {
     // calculate difference in position
-    diff = abs(joint_position_command_[i] - joint_position_[i]);
+    // diff = abs(joint_position_command_[i] - joint_position_[i]);
     double speed = abs(joint_velocities_command_[i] * MotorConstants::RADPS_TO_RPM);
     double position = joint_position_command_[i] * MotorConstants::RAD_TO_DEG;
     // joint position correction
-    if (diff > 0.001 && speed < 0.00001 && config_.correction) {
-      RCLCPP_INFO(logger, "Starting joint position correction on joint: %d", i);
-      speed = 0.5;
-    }
+    // if (diff > 0.001 && speed < 0.00001 && config_.correction) {
+    //   RCLCPP_INFO(logger, "Starting joint position correction on joint: %d", i);
+    //   speed = 0.5;
+    // }
     setJointPosition(i, position, speed, RobotConstants::AXIS_ACCELERATION[i]);
   }
   // joint 5-6
-  double speed = abs(joint_velocities_command_[4] * MotorConstants::RADPS_TO_RPM);
-  double position_B = joint_position_command_[4] * MotorConstants::RAD_TO_DEG;
-  double position_C = joint_position_command_[5] * MotorConstants::RAD_TO_DEG;
-  double BC_position[2] = {position_B, position_C};
-  diff = abs(joint_position_command_[4] - joint_position_[4]) + abs(joint_position_command_[5] - joint_position_[5]);
+  // double speed = abs(joint_velocities_command_[4] * MotorConstants::RADPS_TO_RPM);
+  // double position_B = joint_position_command_[4] * MotorConstants::RAD_TO_DEG;
+  // double position_C = joint_position_command_[5] * MotorConstants::RAD_TO_DEG;
+  // double BC_position[2] = {position_B, position_C};
+  // diff = abs(joint_position_command_[4] - joint_position_[4]) + abs(joint_position_command_[5] - joint_position_[5]);
   // joint position correction
-  if (diff > 0.001 && speed < 0.00001 && config_.correction) {
-    RCLCPP_INFO(logger, "Starting joint position correction on BC joints");
-    speed = 0.5;
-  }
-  setBCJointPosition(BC_position, speed, RobotConstants::AXIS_ACCELERATION[4]);
+  // if (diff > 0.001 && speed < 0.00001 && config_.correction) {
+  //   RCLCPP_INFO(logger, "Starting joint position correction on BC joints");
+  //   speed = 0.5;
+  // }
+  // setBCJointPosition(BC_position, 100, 50);
 
   return return_type::OK;
 }
@@ -187,10 +208,10 @@ bool JennyHardwareInterface::sendData(uint8_t id, std::vector<uint8_t> data_vec)
 ////////////////////// set Normal (1-4) Joint Position
 bool JennyHardwareInterface::setJointPosition(uint8_t id, double position, double speed, double acceleration) {
   rclcpp::Logger logger = rclcpp::get_logger("JennyHardwareInterface");
-  if (id < 4) {
-    bool check = setMotorPosition((id + 1), (position * RobotConstants::AXIS_RATIO[id]), (speed * RobotConstants::AXIS_RATIO[id]), acceleration);
-    return check;
-  }
+  // if (id < 4) {
+  bool check = setMotorPosition((id + 1), (position * RobotConstants::AXIS_RATIO[id]), (speed * RobotConstants::AXIS_RATIO[id]), acceleration);
+  return check;
+  // }
   if (config_.debug) {
     RCLCPP_INFO(logger, "Setting Position: ID: %d CurrentPos; %f Position: %.3f Speed: %.3f", id, (joint_position_[id] * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id]), (position * RobotConstants::AXIS_RATIO[id]), (speed * RobotConstants::AXIS_RATIO[id]));
   }
@@ -391,8 +412,8 @@ void JennyHardwareInterface::printJointInfo(uint8_t id) {
   double setPos = joint_position_command_[id];
   double actPos = getJointPosition(id);
   double posDiff = abs(actPos - setPos);
-  double setVel = joint_position_command_[id];
-  double actVel = getJointPosition(id);
+  double setVel = joint_velocities_command_[id];
+  double actVel = getJointVelocity(id);
   double velDiff = abs(actVel - setVel);
   RCLCPP_INFO(logger, "SetPos: %.4f ActPos: %.4f PosDiff: %.4f SetVel: %.4f ActVel: %.4f VelDiff: %.4f", setPos, actPos, posDiff, setVel, actVel, velDiff);
 }

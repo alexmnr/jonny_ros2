@@ -10,6 +10,7 @@ endif()
 # find dependencies
 set(Dependencies
   hardware_interface
+  jenny_interfaces
   rclcpp
   pluginlib
   ros2_socketcan

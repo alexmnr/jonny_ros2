@@ -30,6 +30,9 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#include <jenny_interfaces/msg/joint_status.hpp>
+#include <jenny_interfaces/msg/hardware_status.hpp>
+
 
 using hardware_interface::return_type;
 
@@ -139,6 +142,9 @@ protected:
   double trigger_joint_command_threshold_ = 1e-3;
   bool ready = false;
   Config config_;
+  // rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr topic_based_joint_states_subscriber_;
+  rclcpp::Publisher<jenny_interfaces::msg::HardwareStatus>::SharedPtr pub_;
+  rclcpp::Node::SharedPtr node_;
 
   // can stuff
   std::unique_ptr<drivers::socketcan::SocketCanSender> sender;
