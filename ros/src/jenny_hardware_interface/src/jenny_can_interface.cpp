@@ -1,4 +1,5 @@
 #include "jenny_can_interface.hpp"
+#include <rclcpp/logging.hpp>
 
 namespace jenny_hardware_interface {
 
@@ -26,15 +27,8 @@ JennyHardwareInterface::on_init(const hardware_interface::HardwareInfo &info) {
   }
   RCLCPP_INFO(logger, "Initializing Jenny Hardware Interface...");
 
-  // config_.device = info_.hardware_parameters["device"];
-  // config_.homing = info_.hardware_parameters["homing"];
-  // if (info_.hardware_parameters["debug"] == "true") {
-  //   config_.debug = true;
-  // } else {
-  //   config_.debug = false;
-  // }
+  // set up config
   config_.debug = false;
-  config_.correction = true;
 
   // thread for receiving can responses
   stop_thread_.store(false);
@@ -83,8 +77,6 @@ JennyHardwareInterface::on_activate(const rclcpp_lifecycle::State &) {
     joint_velocities_[i] = 0.0;
   }
 
-  // TODO: configure homing and check position before starting
-
   ready = true;
 
   return CallbackReturn::SUCCESS;
@@ -99,44 +91,13 @@ return_type JennyHardwareInterface::read(const rclcpp::Time & /*time*/,
     return return_type::OK;
   }
 
-  // for each joint
+  // get current position for each joint
   for (int i = 0; i < 6; i++) {
-    // get current position
     joint_position_[i] = getJointPosition(i);
   }
 
-  // joint_position_[4] = joint_position_command_[4];
-  // joint_position_[5] = joint_position_command_[5];
-
-  // calculate speeds
-  calculateMotorVelocities();
-
-  // for each motor
-  bool check;
-  for (int id = 1; id < 7; id++) {
-    // request position for next run
-    check = requestPosition(id);
-    if (!check) {
-      RCLCPP_ERROR(logger, "Failed to request Position from motor with id: %d" , id);
-    }
-  }
-
-  // debug:
-  // printJointInfo(4);
-
-  auto msg = jenny_interfaces::msg::HardwareStatus();
-  msg.stamp = node_->get_clock()->now();
-  msg.status = "Jup";
-  for (int i = 0; i < 4; i++) {
-    auto joint = jenny_interfaces::msg::JointStatus();
-    joint.id = i;
-    joint.set_position = joint_position_command_[i];
-    joint.actual_position = getJointPosition(i);
-    joint.set_velocity = joint_velocities_command_[i];
-    joint.actual_velocity = getJointVelocity(i);
-    msg.joints.push_back(joint);
-  }
-  pub_->publish(msg);
+  // publish Hardware Info Topic
+  publishHardwareInfo();
 
   return return_type::OK;
 }
@@ -150,34 +111,35 @@ return_type JennyHardwareInterface::write(const rclcpp::Time &,
   if (ready == false) {
     return return_type::OK;
   }
+  // find time difference
+  current_loop_time_ = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_loop_time_ - previous_loop_time_);
+  double milliseconds = duration.count();
 
-  // double diff = 0.0;
-
-  // joint 1-4
+  // joint 1-6
   for (int i = 0; i < 6; i++) {
-    // calculate difference in position
-    // diff = abs(joint_position_command_[i] - joint_position_[i]);
-    double speed = abs(joint_velocities_command_[i] * MotorConstants::RADPS_TO_RPM);
     double position = joint_position_command_[i] * MotorConstants::RAD_TO_DEG;
-    // joint position correction
-    // if (diff > 0.001 && speed < 0.00001 && config_.correction) {
-    //   RCLCPP_INFO(logger, "Starting joint position correction on joint: %d", i);
-    //   speed = 0.5;
-    // }
-    setJointPosition(i, position, speed, RobotConstants::AXIS_ACCELERATION[i]);
+    double currentSpeed = abs(getJointVelocity(i));
+    double addSpeed = abs(joint_position_command_[i] - getJointPosition(i)) * (1000 / milliseconds);
+    if (addSpeed > 10) {
+      addSpeed = 10;
+    }
+    double speed = currentSpeed + addSpeed;
+
+    setJointPosition(i, position, speed, 0);
   }
-  // joint 5-6
-  // double speed = abs(joint_velocities_command_[4] * MotorConstants::RADPS_TO_RPM);
-  // double position_B = joint_position_command_[4] * MotorConstants::RAD_TO_DEG;
-  // double position_C = joint_position_command_[5] * MotorConstants::RAD_TO_DEG;
-  // double BC_position[2] = {position_B, position_C};
-  // diff = abs(joint_position_command_[4] - joint_position_[4]) + abs(joint_position_command_[5] - joint_position_[5]);
-  // joint position correction
-  // if (diff > 0.001 && speed < 0.00001 && config_.correction) {
-  //   RCLCPP_INFO(logger, "Starting joint position correction on BC joints");
-  //   speed = 0.5;
-  // }
-  // setBCJointPosition(BC_position, 100, 50);
+
+  // save for next run
+  previous_loop_time_ = current_loop_time_;
+  
+  // request position for next run
+  bool check;
+  for (int id = 1; id < 7; id++) {
+    check = requestPosition(id);
+    if (!check) {
+      RCLCPP_ERROR(logger, "Failed to request Position from motor with id: %d" , id);
+    }
+  }
 
   return return_type::OK;
 }
@@ -260,45 +222,24 @@ bool JennyHardwareInterface::requestPosition(uint8_t id) {
   return check;
 }
 
-////////////////////// calculate Motor Speed
-void JennyHardwareInterface::calculateMotorVelocities() { 
-  // calculate time difference
-  current_time_ = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - previous_time_);
-  auto milliseconds = duration.count();
-
-  // find out speed
-  for (int i = 0; i < 6; i++) {
-    motor_velocity_buffer_[i] = (motor_position_buffer_[i] - motor_previous_position_buffer_[i]) / milliseconds;
-    motor_velocity_buffer_[i] *= 1000; // to seconds
-    motor_velocity_buffer_[i] *= MotorConstants::DEG_TO_RAD; // to rads
-  }
-
-  // after calculations (for next time)
-  for (int i = 0; i < 6; i++) {
-    motor_previous_position_buffer_[i] = motor_position_buffer_[i];
-  }
-  previous_time_ = std::chrono::high_resolution_clock::now();
-}
-
 ////////////////////// read Position
 double JennyHardwareInterface::getJointPosition(uint8_t id) {
   double joint_position;
-  if (id == 4) {
-    joint_position = (0.5 * (motor_position_buffer_[4] - motor_position_buffer_[5]));
-    joint_position = (joint_position * MotorConstants::DEG_TO_RAD);
-    joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
-    joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
-  } else if (id == 5) {
-    joint_position = (0.5 * (motor_position_buffer_[5] + motor_position_buffer_[4]));
-    joint_position = (joint_position * MotorConstants::DEG_TO_RAD);
-    joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
-    joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
-  } else {
-    joint_position = (motor_position_buffer_[id] * MotorConstants::DEG_TO_RAD);
-    joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
-    joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
-  }
+  // if (id == 4) {
+  //   joint_position = (0.5 * (motor_position_buffer_[4] - motor_position_buffer_[5]));
+  //   joint_position = (joint_position * MotorConstants::DEG_TO_RAD);
+  //   joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
+  //   joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
+  // } else if (id == 5) {
+  //   joint_position = (0.5 * (motor_position_buffer_[5] + motor_position_buffer_[4]));
+  //   joint_position = (joint_position * MotorConstants::DEG_TO_RAD);
+  //   joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
+  //   joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
+  // } else {
+  joint_position = (motor_position_buffer_[id] * MotorConstants::DEG_TO_RAD);
+  joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
+  joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
+  // }
 
   return joint_position;
 }
@@ -306,19 +247,19 @@ double JennyHardwareInterface::getJointPosition(uint8_t id) {
 ////////////////////// read Speed
 double JennyHardwareInterface::getJointVelocity(uint8_t id) {
   double joint_velocity;
-  if (id == 4) {
-    joint_velocity = (0.5 * (motor_velocity_buffer_[5] + motor_velocity_buffer_[4]));
-    joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
-    joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
-  } else if (id == 5) {
-    joint_velocity = (0.5 * (motor_velocity_buffer_[5] + motor_velocity_buffer_[4]));
-    joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
-    joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
-  } else {
-    joint_velocity = motor_velocity_buffer_[id];
-    joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
-    joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
-  }
+  // if (id == 4) {
+  //   joint_velocity = (0.5 * (motor_velocity_buffer_[5] + motor_velocity_buffer_[4]));
+  //   joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
+  //   joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
+  // } else if (id == 5) {
+  //   joint_velocity = (0.5 * (motor_velocity_buffer_[5] + motor_velocity_buffer_[4]));
+  //   joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
+  //   joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
+  // } else {
+  joint_velocity = motor_velocity_buffer_[id];
+  joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
+  joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
+  // }
   return joint_velocity;
 }
 
@@ -334,10 +275,11 @@ void JennyHardwareInterface::handleCANResponses() {
   } catch (const std::runtime_error & e) {
     RCLCPP_FATAL(logger, "Failed to configure SocketCAN: %s", e.what());
     receiver.reset();
-
+    return;
   } catch (...) {
     RCLCPP_FATAL(logger, "An unexpected error occurred during SocketCAN configuration.");
     receiver.reset();
+    return;
   }
 
   std::vector<uint8_t> response(8, 0); // Maximum data length for standard CAN frames/
@@ -363,12 +305,20 @@ void JennyHardwareInterface::handleCANResponses() {
         // Convert addition value to degrees
         motor_position_buffer_[id-1] = (double)(value * MotorConstants::DEGREES_PER_REVOLUTION) / MotorConstants::ENCODER_STEPS;
 
-      ////////////// motor velocity response (not used cause really inresponsive)
-      } else if (length == 4 && response[0] == 0x32){
-        int16_t value = 
-          (static_cast<int16_t>(response[1]) << 8) |
-          static_cast<int16_t>(response[2]);
-        motor_velocity_buffer_[id-1] = (double)value;
+        // find time difference
+        current_time_ = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - previous_time_[id-1]);
+        auto milliseconds = duration.count();
+
+        // calculate speed
+        double buffer;
+        buffer = (motor_position_buffer_[id-1] - motor_previous_position_buffer_[id-1]) / milliseconds;
+        buffer *= 1000; // to seconds
+        buffer *= MotorConstants::DEG_TO_RAD; // to rads
+        motor_velocity_buffer_[id-1] = buffer;
+        // after calculations (for next time)
+        motor_previous_position_buffer_[id-1] = motor_position_buffer_[id-1];
+        previous_time_[id-1] = std::chrono::high_resolution_clock::now();
 
       //////////// ignore
       } else if (length == 2) {
@@ -407,6 +357,7 @@ void JennyHardwareInterface::handleCANResponses() {
   return;
 }
 
+////////////////////// print Joint Info
 void JennyHardwareInterface::printJointInfo(uint8_t id) {
   rclcpp::Logger logger = rclcpp::get_logger("JennyHardwareInterface");
   double setPos = joint_position_command_[id];
@@ -418,12 +369,32 @@ void JennyHardwareInterface::printJointInfo(uint8_t id) {
   RCLCPP_INFO(logger, "SetPos: %.4f ActPos: %.4f PosDiff: %.4f SetVel: %.4f ActVel: %.4f VelDiff: %.4f", setPos, actPos, posDiff, setVel, actVel, velDiff);
 }
 
+////////////////////// publish Hardware Info
+void JennyHardwareInterface::publishHardwareInfo() {
+  auto msg = jenny_interfaces::msg::HardwareStatus();
+  msg.stamp = node_->get_clock()->now();
+  msg.status = "Jup";
+  for (int i = 0; i < 6; i++) {
+    auto joint = jenny_interfaces::msg::JointStatus();
+    joint.id = i;
+    joint.set_position = joint_position_command_[i];
+    joint.actual_position = getJointPosition(i);
+    joint.set_velocity = joint_velocities_command_[i];
+    joint.actual_velocity = getJointVelocity(i);
+    msg.joints.push_back(joint);
+  }
+  pub_->publish(msg);
+}
+
 ////////////////////// on_cleanup /////////////////////////
 CallbackReturn
 JennyHardwareInterface::on_cleanup(const rclcpp_lifecycle::State &) {
   rclcpp::Logger logger = rclcpp::get_logger("JennyHardwareInterface");
   RCLCPP_INFO(logger, "Cleaning up ...please wait...");
   stop_thread_.store(true);
+  if (can_response_thread_.joinable()) {
+    can_response_thread_.join();
+  }
 
   RCLCPP_INFO(logger, "Successfully cleaned up!");
 

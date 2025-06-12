@@ -47,7 +47,6 @@ class JennyHardwareInterface
     std::string device = "can0";
     bool homing = false;
     bool debug = false;
-    bool correction = true;
   };
 
   struct CANCommands {
@@ -109,7 +108,6 @@ class JennyHardwareInterface
     static constexpr double AXIS_RATIO[6] = {13.5, 150, 150, 45, 45, 45};
     static constexpr double AXIS_SET_INVERTED[6] = {1, -1, 1, -1, -1, 1};
     static constexpr double AXIS_GET_INVERTED[6] = {1, -1, -1, -1, -1, 1};
-    static constexpr double AXIS_ACCELERATION[6] = {0, 0, 0, 0, 0, 0};
   };
 
 public:
@@ -139,10 +137,10 @@ public:
   return_type write(const rclcpp::Time & /*time*/,
                     const rclcpp::Duration & /*period*/) override;
 protected:
-  double trigger_joint_command_threshold_ = 1e-3;
   bool ready = false;
   Config config_;
-  // rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr topic_based_joint_states_subscriber_;
+
+  // Hardware Status Logger
   rclcpp::Publisher<jenny_interfaces::msg::HardwareStatus>::SharedPtr pub_;
   rclcpp::Node::SharedPtr node_;
 
@@ -160,10 +158,6 @@ protected:
   std::unordered_map<std::string, std::vector<std::string>> joint_interfaces = {
       {"position", {}}, {"velocity", {}}};
 
-  // threads
-  std::thread can_response_thread_;
-  std::atomic<bool> stop_thread_; // Atomic flag to control the thread's loop
-
   // position buffers
   std::array<double, 6> motor_position_buffer_;
 
@@ -171,25 +165,33 @@ protected:
   std::array<double, 6> motor_previous_position_buffer_;
   std::array<double, 6> motor_velocity_buffer_;
   std::chrono::time_point<std::chrono::high_resolution_clock> current_time_;
-  std::chrono::time_point<std::chrono::high_resolution_clock> previous_time_;
+  std::array<std::chrono::time_point<std::chrono::high_resolution_clock>, 6> previous_time_;
 
   // can functions
   bool sendData(uint8_t id, std::vector<uint8_t> data_vec);
+
+  // thread for can response
+  std::thread can_response_thread_;
+  std::atomic<bool> stop_thread_; // Atomic flag to control the thread's loop
+  void handleCANResponses();
 
   // joint control
   bool setJointPosition(uint8_t id, double position, double speed, double acceleration);
   bool setBCJointPosition(double position[2], double speed, double acceleration);
   double getJointPosition(uint8_t id);
   double getJointVelocity(uint8_t id);
-  void calculateMotorVelocities();
 
   // motor functions
   bool setMotorPosition(uint8_t id, double position, double speed, double acceleration);
-  void handleCANResponses();
   bool requestPosition(uint8_t id);
+
+  // loop stuff
+  std::chrono::time_point<std::chrono::high_resolution_clock> current_loop_time_;
+  std::chrono::time_point<std::chrono::high_resolution_clock> previous_loop_time_;
 
   // debug functions
   void printJointInfo(uint8_t id);
+  void publishHardwareInfo();
 };
 } // namespace jenny_hardware_interface
 
