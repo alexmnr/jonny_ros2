@@ -26,7 +26,17 @@ add_library(
   jenny_hardware_interface
   SHARED
   src/jenny_can_interface.cpp
+  src/jenny_motor_control.cpp
 )
+
+# jenny_motor_control
+add_executable(jenny_motor_control src/jenny_motor_control.cpp)
+target_include_directories(jenny_motor_control PRIVATE include)
+target_link_libraries(jenny_motor_control PUBLIC serial)
+ament_target_dependencies(jenny_motor_control PUBLIC ${Dependencies})
+install(TARGETS
+  jenny_motor_control
+  DESTINATION lib/${PROJECT_NAME})
 
 target_compile_features(jenny_hardware_interface PUBLIC cxx_std_17)
 target_include_directories(

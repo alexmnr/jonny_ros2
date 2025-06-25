@@ -34,7 +34,7 @@ JennyHardwareInterface::on_init(const hardware_interface::HardwareInfo &info) {
   auto now = std::chrono::high_resolution_clock::now();
   for (int i = 0; i < 6; i++) {
     motor_stats[i].id = i;
-    motor_stats[i].ready = false;
+    motor_stats[i].ready = true;
     motor_stats[i].position = 0.0;
     motor_stats[i].previous_position = 0.0;
     motor_stats[i].velocity = 0.0;
@@ -88,76 +88,76 @@ JennyHardwareInterface::on_activate(const rclcpp_lifecycle::State &) {
     joint_velocities_[i] = 0.0;
   }
 
-  // request status of all motors
-  for (int can_id = 1; can_id < 7; can_id++) {
-    bool check = requestStatus(can_id);
-    if (check == false) {
-      RCLCPP_ERROR(logger, "Failed to request Status for motor with id: %d", can_id);
-    }
-  }
-  sleep(1);
+  // // request status of all motors
+  // for (int can_id = 1; can_id < 7; can_id++) {
+  //   bool check = requestStatus(can_id);
+  //   if (check == false) {
+  //     RCLCPP_ERROR(logger, "Failed to request Status for motor with id: %d", can_id);
+  //   }
+  // }
+  // sleep(1);
 
-  // check status of all motors
-  bool error = false;
-  for (int i = 0; i < 6; i++) {
-    if (motor_stats[i].ready) {
-      RCLCPP_INFO(logger, "Motor %d is ready", i+1);
-    } else {
-      RCLCPP_ERROR(logger, "Motor %d has not responded as predicted", i+1);
-      error = true;
-    }
-  }
-  if (error) {
-    return CallbackReturn::FAILURE;
-  }
+  // // check status of all motors
+  // bool error = false;
+  // for (int i = 0; i < 6; i++) {
+  //   if (motor_stats[i].ready) {
+  //     RCLCPP_INFO(logger, "Motor %d is ready", i+1);
+  //   } else {
+  //     RCLCPP_ERROR(logger, "Motor %d has not responded as predicted", i+1);
+  //     error = true;
+  //   }
+  // }
+  // if (error) {
+  //   return CallbackReturn::FAILURE;
+  // }
 
-  // move all motors back to zero
-  RCLCPP_INFO(logger, "Zeroing all Motors!");
-  bool check;
-  bool timeout = true;
-  double sum = 0;
-  setJointPosition(0, 0, 20, 20);
-  setJointPosition(1, 0, 20, 20);
-  setJointPosition(2, 0, 20, 20);
-  setJointPosition(3, 0, 20, 20);
-  setJointPosition(4, 0, 20, 20);
-  setJointPosition(5, 0, 20, 50);
+  // // move all motors back to zero
+  // RCLCPP_INFO(logger, "Zeroing all Motors!");
+  // bool check;
+  // bool timeout = true;
+  // double sum = 0;
+  // setJointPosition(0, 0, 20, 20);
+  // setJointPosition(1, 0, 20, 20);
+  // setJointPosition(2, 0, 20, 20);
+  // setJointPosition(3, 0, 20, 20);
+  // setJointPosition(4, 0, 20, 20);
+  // setJointPosition(5, 0, 20, 50);
 
-  // 10 seconds max
-  for (int i = 0; i < 100; i++) {
-    // request position to update
-    for (int can_id = 1; can_id < 7; can_id++) {
-      check = requestPosition(can_id);
-      if (!check) {
-        RCLCPP_ERROR(logger, "Failed to request Position from motor with can_id: %d" , can_id);
-      }
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    // log position
-    RCLCPP_INFO(logger, "1: %5.1f -> 0.0 2: %5.1f -> 0.0 3: %5.1f -> 0.0 4: %5.1f -> 0.0 5: %5.1f -> 0.0 6: %5.1f -> 0.0", 
-        abs(motor_stats[0].position), 
-        abs(motor_stats[1].position), 
-        abs(motor_stats[2].position), 
-        abs(motor_stats[3].position), 
-        abs(motor_stats[4].position), 
-        abs(motor_stats[5].position));
-    // calculate abs sum to check if all zerod
-    sum = 0;
-    for (int a = 0; a < 6; a++) {
-      sum += abs(motor_stats[a].position);
-    }
-    // break out if done
-    if (sum < 0.1) {
-      timeout = false;
-      break;
-    }
-  }
-  // check if timeout
-  if (timeout) {
-    RCLCPP_ERROR(logger, "Failed to zero Motors in time");
-    return CallbackReturn::FAILURE;
-  }
-  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  // // 10 seconds max
+  // for (int i = 0; i < 100; i++) {
+  //   // request position to update
+  //   for (int can_id = 1; can_id < 7; can_id++) {
+  //     check = requestPosition(can_id);
+  //     if (!check) {
+  //       RCLCPP_ERROR(logger, "Failed to request Position from motor with can_id: %d" , can_id);
+  //     }
+  //   }
+  //   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  //   // log position
+  //   RCLCPP_INFO(logger, "1: %5.1f -> 0.0 2: %5.1f -> 0.0 3: %5.1f -> 0.0 4: %5.1f -> 0.0 5: %5.1f -> 0.0 6: %5.1f -> 0.0", 
+  //       abs(motor_stats[0].position), 
+  //       abs(motor_stats[1].position), 
+  //       abs(motor_stats[2].position), 
+  //       abs(motor_stats[3].position), 
+  //       abs(motor_stats[4].position), 
+  //       abs(motor_stats[5].position));
+  //   // calculate abs sum to check if all zerod
+  //   sum = 0;
+  //   for (int a = 0; a < 6; a++) {
+  //     sum += abs(motor_stats[a].position);
+  //   }
+  //   // break out if done
+  //   if (sum < 0.1) {
+  //     timeout = false;
+  //     break;
+  //   }
+  // }
+  // // check if timeout
+  // if (timeout) {
+  //   RCLCPP_ERROR(logger, "Failed to zero Motors in time");
+  //   return CallbackReturn::FAILURE;
+  // }
+  // std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
   RCLCPP_INFO(logger, "Initialization finished!");
   ready = true;
@@ -175,12 +175,19 @@ return_type JennyHardwareInterface::read(const rclcpp::Time & /*time*/,
   }
 
   // get current position for each joint
-  for (int i = 0; i < 6; i++) {
-    joint_position_[i] = getJointPosition(i);
-  }
+  // for (int i = 0; i < 6; i++) {
+  //   joint_position_[i] = getJointPosition(i);
+  // }
+  joint_position_[0] = joint_position_command_[0];
+  joint_position_[1] = joint_position_command_[1];
+  joint_position_[2] = joint_position_command_[2];
+  joint_position_[3] = getJointPosition(3);
+  joint_position_[4] = joint_position_command_[4];
+  joint_position_[5] = joint_position_command_[5];
+  
 
   // publish Hardware Info Topic
-  publishHardwareInfo();
+  // publishHardwareInfo();
 
   return return_type::OK;
 }
@@ -200,11 +207,12 @@ return_type JennyHardwareInterface::write(const rclcpp::Time &,
   double milliseconds = duration.count();
 
   // joint 1-6
-  for (int i = 0; i < 6; i++) {
+  for (int i = 3; i < 4; i++) {
     double position = joint_position_command_[i] * MotorConstants::RAD_TO_DEG;
     double currentSpeed = abs(getJointVelocity(i));
     double addSpeed = abs(joint_position_command_[i] - getJointPosition(i)) * (1000 / milliseconds);
     double speed = currentSpeed + addSpeed;
+    RCLCPP_INFO(logger, "current Speed: %f Add Speed: %f", currentSpeed, addSpeed);
 
     setJointPosition(i, position, speed, 0);
   }
@@ -213,7 +221,7 @@ return_type JennyHardwareInterface::write(const rclcpp::Time &,
   
   // request position for next run
   bool check;
-  for (int can_id = 1; can_id < 7; can_id++) {
+  for (int can_id = 4; can_id < 5; can_id++) {
     if (motor_stats[can_id - 1].ready) {
       check = requestPosition(can_id);
       if (!check) {
@@ -354,7 +362,6 @@ double JennyHardwareInterface::getJointVelocity(uint8_t id) {
 ////////////////////// handle responses
 void JennyHardwareInterface::handleCANResponses() {
   rclcpp::Logger logger = rclcpp::get_logger("JennyHardwareInterface");
-
   // Initialize Receiver
   try {
     if (config_.debug) {RCLCPP_INFO(logger, "Initializing CAN Receiver...");}
@@ -442,9 +449,9 @@ void JennyHardwareInterface::handleCANResponses() {
     } catch (const drivers::socketcan::SocketCanTimeout &) {
       // No frame received within the timeout, which is expected for a zero timeout when no messages are present.
     } catch (const std::runtime_error & e) {
-      RCLCPP_ERROR(this->get_logger(), "Error receiving CAN frame: %s", e.what());
+      RCLCPP_ERROR(logger, "Error receiving CAN frame: %s", e.what());
     } catch (...) {
-      RCLCPP_ERROR(this->get_logger(), "Encountered unkown error when during handlePositionResponses");
+      RCLCPP_ERROR(logger, "Encountered unkown error when during handlePositionResponses");
     }
   }
   return;

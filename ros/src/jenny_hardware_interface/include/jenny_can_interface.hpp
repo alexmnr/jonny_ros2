@@ -33,6 +33,7 @@
 #include <jenny_interfaces/msg/joint_status.hpp>
 #include <jenny_interfaces/msg/hardware_status.hpp>
 
+#include "jenny_motor_control.hpp"
 
 using hardware_interface::return_type;
 
@@ -102,7 +103,7 @@ class JennyHardwareInterface
   };
 
   struct RobotConstants {
-    static constexpr double AXIS_RATIO[6] = {13.5, 150, 150, 45, 45, 45};
+    static constexpr double AXIS_RATIO[6] = {14, 150, 150, 45, 45, 45};
     static constexpr double AXIS_SET_INVERTED[6] = {1, -1, 1, -1, -1, 1};
     static constexpr double AXIS_GET_INVERTED[6] = {1, -1, -1, -1, -1, 1};
   };
