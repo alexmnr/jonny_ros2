@@ -6,13 +6,55 @@ bool JennyMotorControl::init() {
   setupSender();
   setupReceiver();
 
+  homeXAxis();
+  homeYAxis();
+
+  return true;
+}
+////////////////////// Homing Y Axis /////////////////////////
+void JennyMotorControl::homeYAxis(){
+  rclcpp::Logger logger = rclcpp::get_logger("JennyMotorControl");
+  RCLCPP_INFO(logger, "Y Axis: Starting Homing Procedure");
+  setZero(2);
+  RCLCPP_INFO(logger, "Y Axis: Seeking 1. Endstop...");
+  // start seeking
+  setAbsoluteMotorPosition(2, 180*MotorConstants::AXIS_RATIO[1], motor_seeking_speeds[1], 200);
+  // wait for endstop
+  bool output;
+  while(1) {
+    output = readEndStop(2, 100);
+    if (output) {
+      stopAbsoluteMotor(2, 0);
+      break;
+    }
+  }
+  RCLCPP_INFO(logger, "Y Axis: Locating Endstop...");
+  // start locating
+  setRelativeMotorPosition(2, -10*MotorConstants::AXIS_RATIO[1], motor_locating_speeds[1], 200);
+  // wait for endstop
+  while(1) {
+    output = readEndStop(2, 100);
+    if (!output) {
+      stopRelativeMotor(2, 0);
+      break;
+    }
+  }
+  double pos = readMotorPosition(2, 100);
+  RCLCPP_INFO(logger, "Y Axis: Moving to Zero Position...");
+  double goal = pos - (M_PI / 2);
+  setAbsoluteMotorPosition(2, goal*(180/M_PI)*MotorConstants::AXIS_RATIO[1], 300, 20);
+  RCLCPP_INFO(logger, "Y Axis succesfully homed!");
+  setZero(2);
+}
+
+////////////////////// Homing X Axis /////////////////////////
+void JennyMotorControl::homeXAxis(){
+  rclcpp::Logger logger = rclcpp::get_logger("JennyMotorControl");
   RCLCPP_INFO(logger, "X Axis: Starting Homing Procedure");
   setZero(1);
-
   RCLCPP_INFO(logger, "X Axis: Seeking 1. Endstop...");
   // start seeking
   setAbsoluteMotorPosition(1, 360*MotorConstants::AXIS_RATIO[0], motor_seeking_speeds[0], 200);
-
   // wait for endstop
   bool output;
   while(1) {
@@ -23,10 +65,8 @@ bool JennyMotorControl::init() {
     }
   }
   RCLCPP_INFO(logger, "X Axis: Locating 1. Endstop...");
-  
   // start locating
   setRelativeMotorPosition(1, -40*MotorConstants::AXIS_RATIO[0], motor_locating_speeds[0], 200);
-
   // wait for endstop
   while(1) {
     output = readEndStop(1, 100);
@@ -35,16 +75,12 @@ bool JennyMotorControl::init() {
       break;
     }
   }
-
   // save location of first endstop
   double pos1 = readMotorPosition(1, 100);
-  
   RCLCPP_INFO(logger, "X Axis: Seeking 2. Endstop...");
-
   // start seeking
   setRelativeMotorPosition(1, 40*MotorConstants::AXIS_RATIO[0], motor_seeking_speeds[0], 200);
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
   // wait for endstop
   while(1) {
     output = readEndStop(1, 100);
@@ -53,12 +89,9 @@ bool JennyMotorControl::init() {
       break;
     }
   }
-
   RCLCPP_INFO(logger, "X Axis: Locating 2. Endstop...");
-
   // start locating
   setRelativeMotorPosition(1, -40*MotorConstants::AXIS_RATIO[0], motor_locating_speeds[0], 200);
-
   // wait for endstop
   while(1) {
     output = readEndStop(1, 100);
@@ -67,18 +100,13 @@ bool JennyMotorControl::init() {
       break;
     }
   }
-
   // save location of second endstop
   double pos2 = readMotorPosition(1, 100);
-
   RCLCPP_INFO(logger, "X Axis: Moving to Zero Position...");
-
   double goal = pos1 + ((2.0/3.0) * (pos2 - pos1)) - M_PI;
   setAbsoluteMotorPosition(1, goal*(180/M_PI)*MotorConstants::AXIS_RATIO[0], 100, 20);
-
   RCLCPP_INFO(logger, "X Axis succesfully homed!");
-
-  return true;
+  setZero(1);
 }
 
 ////////////////////// read Motor Position /////////////////////////
