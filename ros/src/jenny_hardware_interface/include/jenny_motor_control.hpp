@@ -39,7 +39,7 @@ class JennyMotorControl {
     std::tuple<uint8_t, uint8_t, std::vector<uint8_t>> receiveData(uint16_t timeout);
 
     // motor constants
-    const std::array<double, 6> motor_seeking_speeds = {100, 1, 1, 1, 1, 1};
+    const std::array<double, 6> motor_seeking_speeds = {30, 1, 1, 1, 1, 1};
     const std::array<double, 6> motor_locating_speeds = {5, 1, 1, 1, 1, 1};
 
     // can stuff
