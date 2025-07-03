@@ -44,6 +44,7 @@ class JennyMotorControl {
     // motor constants
     const std::array<double, 6> motor_seeking_speeds = {30, 100, 1, 1, 1, 1};
     const std::array<double, 6> motor_locating_speeds = {5, 20, 1, 1, 1, 1};
+    const std::array<double, 6> motor_home_location = {-180, -89, 1, 1, 1, 1};
 
     // can stuff
     std::unique_ptr<drivers::socketcan::SocketCanSender> sender;

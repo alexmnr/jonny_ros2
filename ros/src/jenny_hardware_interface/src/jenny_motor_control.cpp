@@ -18,7 +18,7 @@ void JennyMotorControl::homeYAxis(){
   setZero(2);
   RCLCPP_INFO(logger, "Y Axis: Seeking 1. Endstop...");
   // start seeking
-  setAbsoluteMotorPosition(2, 180*MotorConstants::AXIS_RATIO[1], motor_seeking_speeds[1], 200);
+  setAbsoluteMotorPosition(2, 180*MotorConstants::AXIS_RATIO[1], motor_seeking_speeds[1], 20);
   // wait for endstop
   bool output;
   while(1) {
@@ -41,7 +41,7 @@ void JennyMotorControl::homeYAxis(){
   }
   double pos = readMotorPosition(2, 100);
   RCLCPP_INFO(logger, "Y Axis: Moving to Zero Position...");
-  double goal = pos - (M_PI / 2);
+  double goal = pos + (motor_home_location[1] * MotorConstants::DEG_TO_RAD);
   setAbsoluteMotorPosition(2, goal*(180/M_PI)*MotorConstants::AXIS_RATIO[1], 300, 20);
   RCLCPP_INFO(logger, "Y Axis succesfully homed!");
   setZero(2);
@@ -54,7 +54,7 @@ void JennyMotorControl::homeXAxis(){
   setZero(1);
   RCLCPP_INFO(logger, "X Axis: Seeking 1. Endstop...");
   // start seeking
-  setAbsoluteMotorPosition(1, 360*MotorConstants::AXIS_RATIO[0], motor_seeking_speeds[0], 200);
+  setAbsoluteMotorPosition(1, 360*MotorConstants::AXIS_RATIO[0], motor_seeking_speeds[0], 20);
   // wait for endstop
   bool output;
   while(1) {
@@ -103,7 +103,7 @@ void JennyMotorControl::homeXAxis(){
   // save location of second endstop
   double pos2 = readMotorPosition(1, 100);
   RCLCPP_INFO(logger, "X Axis: Moving to Zero Position...");
-  double goal = pos1 + ((2.0/3.0) * (pos2 - pos1)) - M_PI;
+  double goal = pos1 + ((2.0/3.0) * (pos2 - pos1)) + (motor_home_location[0] * MotorConstants::DEG_TO_RAD);
   setAbsoluteMotorPosition(1, goal*(180/M_PI)*MotorConstants::AXIS_RATIO[0], 100, 20);
   RCLCPP_INFO(logger, "X Axis succesfully homed!");
   setZero(1);
