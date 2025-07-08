@@ -311,13 +311,6 @@ bool JennyHardwareInterface::requestPosition(uint8_t can_id) {
   return check;
 }
 
-////////////////////// request Status
-bool JennyHardwareInterface::requestStatus(uint8_t can_id) { 
-  std::vector<uint8_t> data = {CANCommands::QUERY_MOTOR};
-  bool check = sendData(can_id, data);
-  return check;
-}
-
 ////////////////////// read Position
 double JennyHardwareInterface::getJointPosition(uint8_t id) {
   double joint_position;
