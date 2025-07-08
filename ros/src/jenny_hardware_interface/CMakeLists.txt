@@ -27,6 +27,7 @@ endforeach()
 add_executable(jenny_motor_control 
   src/jenny_motor_control.cpp
   src/homing.cpp
+  src/can.cpp
   src/motor_control.cpp)
 target_include_directories(jenny_motor_control PRIVATE include)
 ament_target_dependencies(jenny_motor_control PUBLIC ${Dependencies})
