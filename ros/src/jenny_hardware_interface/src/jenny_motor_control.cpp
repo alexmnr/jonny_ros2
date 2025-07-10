@@ -9,6 +9,7 @@ bool JennyMotorControl::init() {
   homeXAxis();
   homeYAxis();
   homeZAxis();
+  homeAAxis();
 
   return true;
 }

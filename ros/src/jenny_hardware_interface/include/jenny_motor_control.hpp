@@ -39,6 +39,7 @@ class JennyMotorControl {
     void homeXAxis();
     void homeYAxis();
     void homeZAxis();
+    void homeAAxis();
 
     bool moveTillEndstop(uint8_t id, double limit, double speed, double acceleration);
 
@@ -49,7 +50,7 @@ class JennyMotorControl {
     // motor constants
     const std::array<double, 6> motor_seeking_speeds = {30, 1, 1, 1, 1, 1};
     const std::array<double, 6> motor_locating_speeds = {5, 20, 20, 1, 1, 1};
-    const std::array<double, 6> motor_home_location = {-180, -92, 119, 1, 1, 1};
+    const std::array<double, 6> motor_home_location = {-180, -92, 119, 0, 1, 1};
 
     // can stuff
     std::unique_ptr<drivers::socketcan::SocketCanSender> sender;

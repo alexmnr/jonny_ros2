@@ -1,6 +1,56 @@
 #include "jenny_motor_control.hpp"
 #include <rclcpp/logging.hpp>
 
+////////////////////// Homing A Axis /////////////////////////
+void JennyMotorControl::homeAAxis(){
+  rclcpp::Logger logger = rclcpp::get_logger("JennyHomingControl");
+  int id = 3;
+  int can_id = id + 1;
+  RCLCPP_INFO(logger, "A Axis: Starting Homing Procedure");
+  setZero(can_id);
+  bool check;
+
+  // seek
+  if (readEndStop(can_id, 100) == false) {
+    // start seeking (skip if already in endstop zone)
+    RCLCPP_INFO(logger, "A Axis: Seeking 1. Endstop...");
+    check = moveTillEndstop(can_id, -180, 15, 100);
+    if (check == false) {
+      RCLCPP_ERROR(logger, "Failed to seek for endstop on A Axis");
+    }
+  }
+  // locate
+  RCLCPP_INFO(logger, "A Axis: Locating 1. Endstop...");
+  check = moveTillEndstop(can_id, 10, 0.5, 0);
+  if (check == false) {
+    RCLCPP_ERROR(logger, "Failed to locate for endstop on A Axis");
+  }
+  double pos1 = readMotorPosition(can_id, 100);
+
+  // seek
+  RCLCPP_INFO(logger, "A Axis: Seeking 2. Endstop...");
+  check = moveTillEndstop(can_id, 180, 15, 100);
+  if (check == false) {
+    RCLCPP_ERROR(logger, "Failed to seek for endstop on A Axis");
+  }
+  // locate
+  RCLCPP_INFO(logger, "A Axis: Locating 2. Endstop...");
+  check = moveTillEndstop(can_id, -10, 0.5, 0);
+  if (check == false) {
+    RCLCPP_ERROR(logger, "Failed to locate for endstop on A Axis");
+  }
+  double pos2 = readMotorPosition(can_id, 100);
+  
+  // // move
+  RCLCPP_INFO(logger, "A Axis: Moving to Zero Position...");
+  double goal_position = pos1 + ((1.0/2.0) * (pos2 - pos1)) + (motor_home_location[id] * MotorConstants::DEG_TO_RAD);
+  goal_position = goal_position * MotorConstants::RAD_TO_DEG * MotorConstants::AXIS_RATIO[id];
+  double goal_speed = 25 * MotorConstants::AXIS_RATIO[id];
+  setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 20);
+  RCLCPP_INFO(logger, "A Axis succesfully homed!");
+  setZero(can_id);
+}
+
 ////////////////////// Homing Z Axis /////////////////////////
 void JennyMotorControl::homeZAxis(){
   rclcpp::Logger logger = rclcpp::get_logger("JennyHomingControl");
