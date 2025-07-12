@@ -14,14 +14,14 @@ void JennyMotorControl::homeAAxis(){
   if (readEndStop(can_id, 100) == false) {
     // start seeking (skip if already in endstop zone)
     RCLCPP_INFO(logger, "A Axis: Seeking 1. Endstop...");
-    check = moveTillEndstop(can_id, -180, 15, 100);
+    check = moveTillEndstop(can_id, 5, 180, 15, 100);
     if (check == false) {
       RCLCPP_ERROR(logger, "Failed to seek for endstop on A Axis");
     }
   }
   // locate
   RCLCPP_INFO(logger, "A Axis: Locating 1. Endstop...");
-  check = moveTillEndstop(can_id, 10, 0.5, 0);
+  check = moveTillEndstop(can_id, 5, -10, 0.5, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on A Axis");
   }
@@ -29,13 +29,13 @@ void JennyMotorControl::homeAAxis(){
 
   // seek
   RCLCPP_INFO(logger, "A Axis: Seeking 2. Endstop...");
-  check = moveTillEndstop(can_id, 180, 15, 100);
+  check = moveTillEndstop(can_id, 5, -180, 15, 100);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to seek for endstop on A Axis");
   }
   // locate
   RCLCPP_INFO(logger, "A Axis: Locating 2. Endstop...");
-  check = moveTillEndstop(can_id, -10, 0.5, 0);
+  check = moveTillEndstop(can_id, 5, 10, 0.5, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on A Axis");
   }
@@ -43,9 +43,10 @@ void JennyMotorControl::homeAAxis(){
   
   // // move
   RCLCPP_INFO(logger, "A Axis: Moving to Zero Position...");
-  double goal_position = pos1 + ((1.0/2.0) * (pos2 - pos1)) + (motor_home_location[id] * MotorConstants::DEG_TO_RAD);
-  goal_position = goal_position * MotorConstants::RAD_TO_DEG * MotorConstants::AXIS_RATIO[id];
-  double goal_speed = 25 * MotorConstants::AXIS_RATIO[id];
+  // RCLCPP_INFO(logger, "Pos1: %f Pos2: %f", pos1, pos2);
+  double goal_position = pos2 + ((1.0/2.0) * (pos1 - pos2)) + (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
+  goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
+  double goal_speed = 25 * RobotConstants::AXIS_RATIO[id];
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 20);
   RCLCPP_INFO(logger, "A Axis succesfully homed!");
   setZero(can_id);
@@ -64,26 +65,26 @@ void JennyMotorControl::homeZAxis(){
   if (readEndStop(can_id, 100) == false) {
     // start seeking (skip if already in endstop zone)
     RCLCPP_INFO(logger, "Z Axis: Seeking Endstop...");
-    check = moveTillEndstop(can_id, -180, 4, 100);
+    check = moveTillEndstop(can_id, can_id, -180, 4, 100);
     if (check == false) {
       RCLCPP_ERROR(logger, "Failed to seek for endstop on Z Axis");
     }
   }
   // locate
   RCLCPP_INFO(logger, "Z Axis: Locating Endstop...");
-  check = moveTillEndstop(can_id, 20, 1, 0);
+  check = moveTillEndstop(can_id, can_id, 20, 1, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on Z Axis");
   }
-  check = moveTillEndstop(can_id, -5, 0.5, 0);
+  check = moveTillEndstop(can_id, can_id, -5, 0.5, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on Z Axis");
   }
   // move
   RCLCPP_INFO(logger, "Z Axis: Moving to Zero Position...");
-  double goal_position = readMotorPosition(can_id, 100) + (motor_home_location[id] * MotorConstants::DEG_TO_RAD);
-  goal_position = goal_position * MotorConstants::RAD_TO_DEG * MotorConstants::AXIS_RATIO[id];
-  double goal_speed = 12 * MotorConstants::AXIS_RATIO[id];
+  double goal_position = - readMotorPosition(can_id, 100) + (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
+  goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
+  double goal_speed = 12 * RobotConstants::AXIS_RATIO[id];
 
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 100);
   RCLCPP_INFO(logger, "Z Axis succesfully homed!");
@@ -102,26 +103,26 @@ void JennyMotorControl::homeYAxis(){
   if (readEndStop(can_id, 100) == false) {
     // start seeking (skip if already in endstop zone)
     RCLCPP_INFO(logger, "Y Axis: Seeking Endstop...");
-    check = moveTillEndstop(can_id, 180, 4, 100);
+    check = moveTillEndstop(can_id, can_id, -180, 4, 100);
     if (check == false) {
       RCLCPP_ERROR(logger, "Failed to seek for endstop on Y Axis");
     }
   }
   // locate
   RCLCPP_INFO(logger, "Y Axis: Locating Endstop...");
-  check = moveTillEndstop(can_id, -20, 1, 0);
+  check = moveTillEndstop(can_id, can_id, 20, 1, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on Y Axis");
   }
-  check = moveTillEndstop(can_id, 5, 0.5, 0);
+  check = moveTillEndstop(can_id, can_id, -5, 0.5, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on Y Axis");
   }
   // move
   RCLCPP_INFO(logger, "Y Axis: Moving to Yero Position...");
-  double goal_position = readMotorPosition(can_id, 100) + (motor_home_location[id] * MotorConstants::DEG_TO_RAD);
-  goal_position = goal_position * MotorConstants::RAD_TO_DEG * MotorConstants::AXIS_RATIO[id];
-  double goal_speed = 12 * MotorConstants::AXIS_RATIO[id];
+  double goal_position = readMotorPosition(can_id, 100) - (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
+  goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
+  double goal_speed = 12 * RobotConstants::AXIS_RATIO[id];
 
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 100);
   RCLCPP_INFO(logger, "Y Axis succesfully homed!");
@@ -141,18 +142,18 @@ void JennyMotorControl::homeXAxis(){
   if (readEndStop(can_id, 100) == false) {
     // start seeking (skip if already in endstop zone)
     RCLCPP_INFO(logger, "X Axis: Seeking 1. Endstop...");
-    check = moveTillEndstop(can_id, 360, 8, 50);
+    check = moveTillEndstop(can_id, can_id, 360, 8, 50);
     if (check == false) {
       RCLCPP_ERROR(logger, "Failed to seek for endstop on X Axis");
     }
   }
   // locate
   RCLCPP_INFO(logger, "X Axis: Locating 1. Endstop...");
-  check = moveTillEndstop(can_id, -30, 2, 0);
+  check = moveTillEndstop(can_id, can_id, -30, 2, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on X Axis");
   }
-  check = moveTillEndstop(can_id, 20, 1, 0);
+  check = moveTillEndstop(can_id, can_id, 20, 1, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on X Axis");
   }
@@ -160,13 +161,13 @@ void JennyMotorControl::homeXAxis(){
 
   // seek 2nd
   RCLCPP_INFO(logger, "X Axis: Seeking 2. Endstop...");
-  check = moveTillEndstop(can_id, 50, 8, 50);
+  check = moveTillEndstop(can_id, can_id, 50, 8, 50);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to seek for endstop on X Axis");
   }
   // locate
   RCLCPP_INFO(logger, "X Axis: Locating 2. Endstop...");
-  check = moveTillEndstop(can_id, -30, 1, 0);
+  check = moveTillEndstop(can_id, can_id, -30, 1, 0);
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on X Axis");
   }
@@ -174,34 +175,34 @@ void JennyMotorControl::homeXAxis(){
 
   // move
   RCLCPP_INFO(logger, "X Axis: Moving to Zero Position...");
-  double goal_position = pos1 + ((1.0/2.0) * (pos2 - pos1)) + (motor_home_location[id] * MotorConstants::DEG_TO_RAD);
-  goal_position = goal_position * MotorConstants::RAD_TO_DEG * MotorConstants::AXIS_RATIO[id];
-  double goal_speed = 25 * MotorConstants::AXIS_RATIO[id];
+  double goal_position = pos1 + ((1.0/2.0) * (pos2 - pos1)) + (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
+  goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
+  double goal_speed = 25 * RobotConstants::AXIS_RATIO[id];
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 20);
   RCLCPP_INFO(logger, "X Axis succesfully homed!");
   setZero(can_id);
 }
 
 ////////////////////// moveTillEndstop /////////////////////////
-bool JennyMotorControl::moveTillEndstop(uint8_t can_id, double limit, double speed, double acceleration) {
+bool JennyMotorControl::moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, double limit, double speed, double acceleration) {
   rclcpp::Logger logger = rclcpp::get_logger("JennyHomingControl");
 
-  double max_position = limit*MotorConstants::AXIS_RATIO[can_id-1];
-  double max_speed = speed*MotorConstants::AXIS_RATIO[can_id-1];
+  double max_position = limit*RobotConstants::AXIS_RATIO[motor_id-1];
+  double max_speed = speed*RobotConstants::AXIS_RATIO[motor_id-1];
 
-  bool base_reading = readEndStop(can_id, 100);
+  bool base_reading = readEndStop(endstop_id, 100);
 
   // start seeking
-  setRelativeMotorPosition(can_id, max_position, max_speed, acceleration);
+  setRelativeMotorPosition(motor_id, max_position, max_speed, acceleration);
 
   // wait for endstop or to reach limit position
   bool output;
   uint8_t status;
   while(1) {
-    status = readStatus(can_id, 100);
-    output = readEndStop(can_id, 100);
+    status = readStatus(motor_id, 100);
+    output = readEndStop(endstop_id, 100);
     if (output != base_reading) {
-      stopRelativeMotor(can_id, 0);
+      stopRelativeMotor(motor_id, 0);
       return true;
     }
     if (status == 1) {

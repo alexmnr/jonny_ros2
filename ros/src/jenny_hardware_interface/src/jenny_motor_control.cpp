@@ -6,10 +6,14 @@ bool JennyMotorControl::init() {
   setupSender();
   setupReceiver();
 
-  homeXAxis();
-  homeYAxis();
-  homeZAxis();
-  homeAAxis();
+  // homeXAxis();
+  // homeYAxis();
+  // homeZAxis();
+  // homeAAxis();
+  // setRelativeMotorPosition(6, -5000, 2000, 200);
+  // double BC_position[2] = {0, 0};
+  // setAbsoluteBCJointPosition(BC_position, 72, 200);
+  setMotorVelocity(6, 000, 5);
 
   return true;
 }

@@ -30,6 +30,12 @@ class JennyMotorControl {
     // Motor Control by velocity
     bool setMotorVelocity(uint8_t can_id, double speed, double acceleration);
 
+    // Joint Control
+    bool setRelativeXYZAJointPosition(uint8_t id, double position, double speed, double acceleration);
+    bool setAbsoluteXYZAJointPosition(uint8_t id, double position, double speed, double acceleration);
+    bool setRelativeBCJointPosition(double position[2], double speed, double acceleration);
+    bool setAbsoluteBCJointPosition(double position[2], double speed, double acceleration);
+
     // Other
     bool setZero(uint8_t can_id);
     bool requestStatus(uint8_t can_id);
@@ -41,16 +47,11 @@ class JennyMotorControl {
     void homeZAxis();
     void homeAAxis();
 
-    bool moveTillEndstop(uint8_t id, double limit, double speed, double acceleration);
+    bool moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, double limit, double speed, double acceleration);
 
     // can function
     bool sendData(uint8_t can_id, std::vector<uint8_t> data_vec);
     std::tuple<uint8_t, uint8_t, std::vector<uint8_t>> receiveData(uint16_t timeout);
-
-    // motor constants
-    const std::array<double, 6> motor_seeking_speeds = {30, 1, 1, 1, 1, 1};
-    const std::array<double, 6> motor_locating_speeds = {5, 20, 20, 1, 1, 1};
-    const std::array<double, 6> motor_home_location = {-180, -92, 119, 0, 1, 1};
 
     // can stuff
     std::unique_ptr<drivers::socketcan::SocketCanSender> sender;
@@ -98,11 +99,12 @@ class JennyMotorControl {
       static constexpr double DEGPS_TO_RPM = 60.0 / 360.0;     // rad/s to RPM (30/π)
       static constexpr double DEG_TO_RAD = M_PI / 180.0;      // degrees to radians
       static constexpr double RAD_TO_DEG = 180.0 / M_PI;      // radians to degrees
-      
-      // reversed or not
-      static constexpr double AXIS_SET_INVERTED[6] = {1, -1, 1, -1, -1, 1};
-      static constexpr double AXIS_GET_INVERTED[6] = {1, -1, -1, -1, -1, 1};
-      static constexpr double AXIS_RATIO[6] = {14, 150, 150, 45, 45, 45};
+    };
+    struct RobotConstants {
+      static constexpr double AXIS_ZERO_POSITION[6] = {-180, -92, 29, 0, 1, 1}; // Amount to move from endstop to zero
+      static constexpr double AXIS_SET_INVERTED[6] = {1, 1, 1, -1, -1, 1}; // invert position when sending commands
+      static constexpr double AXIS_GET_INVERTED[6] = {1, 1, 1, -1, 1, 1}; // invert position when reading from motor
+      static constexpr double AXIS_RATIO[6] = {14, 150, 150, 45, 36, 36}; // axis ratio
     };
 
 };
