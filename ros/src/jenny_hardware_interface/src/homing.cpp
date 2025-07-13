@@ -9,29 +9,48 @@ void JennyMotorControl::homeBCAxis(){
   setZero(6);
   bool output;
   uint8_t status;
+  double max_position;
+  double max_speed;
 
   // seek
   RCLCPP_INFO(logger, "B Axis: Seeking Endstop...");
   // move till endstop triggered
-  double max_position = 180*RobotConstants::AXIS_RATIO[5];
-  double max_speed = 20*RobotConstants::AXIS_RATIO[5];
-  setRelativeMotorPosition(5, -max_position, max_speed, 200);
-  setRelativeMotorPosition(6, max_position, max_speed, 200);
-  while(1) {
-    status = readStatus(5, 100);
-    output = readEndStop(6, 100);
-    if (output) {
-      stopRelativeMotor(5, 0);
-      stopRelativeMotor(6, 0);
+  bool safety = false;
+  for (int i = 0; i < 2; i++) {
+    max_position = 180*RobotConstants::AXIS_RATIO[5];
+    max_speed = 20*RobotConstants::AXIS_RATIO[5];
+    setRelativeMotorPosition(5, -max_position, max_speed, 200);
+    setRelativeMotorPosition(6, max_position, max_speed, 200);
+    while(1) {
+      status = readStatus(5, 100);
+      output = readEndStop(6, 100);
+      if (output) {
+        stopRelativeMotor(5, 0);
+        stopRelativeMotor(6, 0);
+        break;
+      }
+      if (status == 1) {
+        RCLCPP_ERROR(logger, "Could not find BC Endstop");
+        return;
+      }
+    }
+    if (safety) {
       break;
     }
-    if (status == 1) {
-      RCLCPP_ERROR(logger, "Could not find BC Endstop");
-      return;
+    // check if the correct magnet was detected
+    max_position = 90*RobotConstants::AXIS_RATIO[5];
+    max_speed = 20*RobotConstants::AXIS_RATIO[5];
+    setRelativeMotorPosition(5, -max_position, max_speed, 200);
+    setRelativeMotorPosition(6, -max_position, max_speed, 200);
+    waitTillStopped(5);
+    waitTillStopped(6);
+    output = readEndStop(6, 100);
+    if (output) {
+      break;
+    } else {
+      safety = true;
     }
   }
-  waitTillStopped(5);
-  waitTillStopped(6);
   // move back
   max_position = -10*RobotConstants::AXIS_RATIO[5];
   max_speed = 40*RobotConstants::AXIS_RATIO[5];
@@ -115,6 +134,104 @@ void JennyMotorControl::homeBCAxis(){
   RCLCPP_INFO(logger, "B Axis succesfully homed!");
   setZero(5);
   setZero(6);
+
+  // C Axis Homing
+  RCLCPP_INFO(logger, "C Axis: Starting Homing Procedure");
+  // seek
+  RCLCPP_INFO(logger, "C Axis: Seeking Endstop...");
+  max_position = 360*RobotConstants::AXIS_RATIO[5];
+  max_speed = 20*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  // Move back
+  max_position = -10*RobotConstants::AXIS_RATIO[5];
+  max_speed = 40*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  waitTillStopped(5);
+  waitTillStopped(6);
+  // Locate
+  RCLCPP_INFO(logger, "C Axis: Locating Endstop...");
+  max_position = 15*RobotConstants::AXIS_RATIO[5];
+  max_speed = 4*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  pos1 = readMotorPosition(5, 100);
+  // moving to other side
+  max_position = 90*RobotConstants::AXIS_RATIO[5];
+  max_speed = 20*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (!output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  // Locate
+  RCLCPP_INFO(logger, "C Axis: Locating Endstop...");
+  max_position = -20*RobotConstants::AXIS_RATIO[5];
+  max_speed = 4*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  pos2 = readMotorPosition(5, 100);
+  // move
+  goal_position = - abs((pos2 - pos1) / 2) - (RobotConstants::AXIS_ZERO_POSITION[5] * MotorConstants::DEG_TO_RAD);
+  goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[5];
+  goal_speed = 30 * RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, goal_position, goal_speed, 200);
+  setRelativeMotorPosition(6, goal_position, goal_speed, 200);
+  waitTillStopped(5);
+  waitTillStopped(6);
+  RCLCPP_INFO(logger, "C Axis succesfully homed!");
+  setZero(5);
+  setZero(6);
 }
 
 ////////////////////// Homing A Axis /////////////////////////
@@ -164,8 +281,9 @@ void JennyMotorControl::homeAAxis(){
   goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
   double goal_speed = 25 * RobotConstants::AXIS_RATIO[id];
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 20);
-  RCLCPP_INFO(logger, "A Axis succesfully homed!");
+  waitTillStopped(can_id);
   setZero(can_id);
+  RCLCPP_INFO(logger, "A Axis succesfully homed!");
 }
 
 ////////////////////// Homing Z Axis /////////////////////////
@@ -203,8 +321,9 @@ void JennyMotorControl::homeZAxis(){
   double goal_speed = 12 * RobotConstants::AXIS_RATIO[id];
 
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 100);
-  RCLCPP_INFO(logger, "Z Axis succesfully homed!");
+  waitTillStopped(can_id);
   setZero(can_id);
+  RCLCPP_INFO(logger, "Z Axis succesfully homed!");
 }
 
 ////////////////////// Homing Y Axis /////////////////////////
@@ -241,8 +360,9 @@ void JennyMotorControl::homeYAxis(){
   double goal_speed = 12 * RobotConstants::AXIS_RATIO[id];
 
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 100);
-  RCLCPP_INFO(logger, "Y Axis succesfully homed!");
+  waitTillStopped(can_id);
   setZero(can_id);
+  RCLCPP_INFO(logger, "Y Axis succesfully homed!");
 }
 
 ////////////////////// Homing X Axis /////////////////////////
@@ -295,8 +415,9 @@ void JennyMotorControl::homeXAxis(){
   goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
   double goal_speed = 25 * RobotConstants::AXIS_RATIO[id];
   setAbsoluteMotorPosition(can_id, goal_position, goal_speed, 20);
-  RCLCPP_INFO(logger, "X Axis succesfully homed!");
+  waitTillStopped(can_id);
   setZero(can_id);
+  RCLCPP_INFO(logger, "X Axis succesfully homed!");
 }
 
 ////////////////////// moveTillEndstop /////////////////////////
