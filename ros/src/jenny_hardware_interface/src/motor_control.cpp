@@ -1,6 +1,17 @@
 #include "jenny_motor_control.hpp"
 #include <rclcpp/logging.hpp>
 
+////////////////////// wait till stop /////////////////////////
+void JennyMotorControl::waitTillStopped(uint8_t can_id) { 
+  uint8_t status;
+  while(1) {
+    status = readStatus(can_id, 100);
+    if (status == 1) {
+      return;
+    }
+  }
+}
+
 ////////////////////// request Status /////////////////////////
 bool JennyMotorControl::requestStatus(uint8_t can_id) { 
   std::vector<uint8_t> data = {CANCommands::QUERY_MOTOR};

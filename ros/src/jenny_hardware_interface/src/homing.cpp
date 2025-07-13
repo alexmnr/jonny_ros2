@@ -1,6 +1,122 @@
 #include "jenny_motor_control.hpp"
 #include <rclcpp/logging.hpp>
 
+////////////////////// Homing BC Axis /////////////////////////
+void JennyMotorControl::homeBCAxis(){
+  rclcpp::Logger logger = rclcpp::get_logger("JennyHomingControl");
+  RCLCPP_INFO(logger, "B Axis: Starting Homing Procedure");
+  setZero(5);
+  setZero(6);
+  bool output;
+  uint8_t status;
+
+  // seek
+  RCLCPP_INFO(logger, "B Axis: Seeking Endstop...");
+  // move till endstop triggered
+  double max_position = 180*RobotConstants::AXIS_RATIO[5];
+  double max_speed = 20*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, -max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  waitTillStopped(5);
+  waitTillStopped(6);
+  // move back
+  max_position = -10*RobotConstants::AXIS_RATIO[5];
+  max_speed = 40*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, -max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  waitTillStopped(5);
+  waitTillStopped(6);
+  // Locate
+  RCLCPP_INFO(logger, "B Axis: Locating Endstop...");
+  max_position = 15*RobotConstants::AXIS_RATIO[5];
+  max_speed = 4*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, -max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  waitTillStopped(5);
+  waitTillStopped(6);
+  double pos1 = readMotorPosition(5, 100);
+  // approach from different reaction
+  max_position = 40*RobotConstants::AXIS_RATIO[5];
+  max_speed = 20*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, -max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (!output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  waitTillStopped(5);
+  waitTillStopped(6);
+  // Locate
+  RCLCPP_INFO(logger, "B Axis: Locating Endstop...");
+  max_position = -10*RobotConstants::AXIS_RATIO[5];
+  max_speed = 4*RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, -max_position, max_speed, 200);
+  setRelativeMotorPosition(6, max_position, max_speed, 200);
+  while(1) {
+    status = readStatus(5, 100);
+    output = readEndStop(6, 100);
+    if (output) {
+      stopRelativeMotor(5, 0);
+      stopRelativeMotor(6, 0);
+      break;
+    }
+    if (status == 1) {
+      RCLCPP_ERROR(logger, "Could not find BC Endstop");
+      return;
+    }
+  }
+  waitTillStopped(5);
+  waitTillStopped(6);
+  double pos2 = readMotorPosition(5, 100);
+
+  // move
+  double goal_position = abs((pos1 - pos2) / 2) + (RobotConstants::AXIS_ZERO_POSITION[4] * MotorConstants::DEG_TO_RAD);
+  goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[5];
+  double goal_speed = 30 * RobotConstants::AXIS_RATIO[5];
+  setRelativeMotorPosition(5, goal_position, goal_speed, 200);
+  setRelativeMotorPosition(6, -goal_position, goal_speed, 200);
+  waitTillStopped(5);
+  waitTillStopped(6);
+  RCLCPP_INFO(logger, "B Axis succesfully homed!");
+  setZero(5);
+  setZero(6);
+}
+
 ////////////////////// Homing A Axis /////////////////////////
 void JennyMotorControl::homeAAxis(){
   rclcpp::Logger logger = rclcpp::get_logger("JennyHomingControl");

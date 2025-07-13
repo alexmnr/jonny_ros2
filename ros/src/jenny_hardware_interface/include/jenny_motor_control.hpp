@@ -39,6 +39,7 @@ class JennyMotorControl {
     // Other
     bool setZero(uint8_t can_id);
     bool requestStatus(uint8_t can_id);
+    void waitTillStopped(uint8_t can_id);
     uint8_t readStatus(uint8_t can_id, uint16_t timeout);
 
     // Homing
@@ -46,6 +47,7 @@ class JennyMotorControl {
     void homeYAxis();
     void homeZAxis();
     void homeAAxis();
+    void homeBCAxis();
 
     bool moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, double limit, double speed, double acceleration);
 
@@ -101,7 +103,7 @@ class JennyMotorControl {
       static constexpr double RAD_TO_DEG = 180.0 / M_PI;      // radians to degrees
     };
     struct RobotConstants {
-      static constexpr double AXIS_ZERO_POSITION[6] = {-180, -92, 29, 0, 1, 1}; // Amount to move from endstop to zero
+      static constexpr double AXIS_ZERO_POSITION[6] = {-180, -92, 29, 0, 90, 90}; // Amount to move from endstop to zero
       static constexpr double AXIS_SET_INVERTED[6] = {1, 1, 1, -1, -1, 1}; // invert position when sending commands
       static constexpr double AXIS_GET_INVERTED[6] = {1, 1, 1, -1, 1, 1}; // invert position when reading from motor
       static constexpr double AXIS_RATIO[6] = {14, 150, 150, 45, 36, 36}; // axis ratio

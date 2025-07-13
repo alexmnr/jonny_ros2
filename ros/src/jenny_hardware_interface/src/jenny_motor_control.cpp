@@ -10,10 +10,10 @@ bool JennyMotorControl::init() {
   // homeYAxis();
   // homeZAxis();
   // homeAAxis();
-  // setRelativeMotorPosition(6, -5000, 2000, 200);
-  // double BC_position[2] = {0, 0};
-  // setAbsoluteBCJointPosition(BC_position, 72, 200);
-  setMotorVelocity(6, 000, 5);
+  // double BC_position[2] = {0, 20};
+  // setRelativeBCJointPosition(BC_position, 50, 200);
+  // waitTillStopped(5);
+  homeBCAxis();
 
   return true;
 }
