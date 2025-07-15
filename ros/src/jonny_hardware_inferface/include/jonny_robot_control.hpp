@@ -103,7 +103,7 @@ class JonnyRobotControl {
       static constexpr double RAD_TO_DEG = 180.0 / M_PI;      // radians to degrees
     };
     struct RobotConstants {
-      static constexpr double AXIS_ZERO_POSITION[6] = {-180, -92, 29, 0, 90, 78}; // Amount to move from endstop to zero
+      static constexpr double AXIS_ZERO_POSITION[6] = {-180, -91, 119, 0, 90, 78}; // Amount to move from endstop to zero
       static constexpr double AXIS_SET_INVERTED[6] = {1, 1, 1, -1, -1, 1}; // invert position when sending commands
       static constexpr double AXIS_GET_INVERTED[6] = {1, 1, 1, -1, 1, 1}; // invert position when reading from motor
       static constexpr double AXIS_RATIO[6] = {14, 150, 150, 45, 36, 36}; // axis ratio

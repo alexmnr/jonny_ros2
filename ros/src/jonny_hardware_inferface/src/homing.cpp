@@ -354,7 +354,7 @@ void JonnyRobotControl::homeYAxis(){
     RCLCPP_ERROR(logger, "Failed to locate for endstop on Y Axis");
   }
   // move
-  RCLCPP_INFO(logger, "Y Axis: Moving to Yero Position...");
+  RCLCPP_INFO(logger, "Y Axis: Moving to Zero Position...");
   double goal_position = readMotorPosition(can_id, 100) - (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
   goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
   double goal_speed = 12 * RobotConstants::AXIS_RATIO[id];
