@@ -1,0 +1,9 @@
+<library path="jonny_hardware_interface">
+  <class name="jonny_hardware_interface/JonnyHardwareInterface"
+         type="jonny_hardware_interface::JonnyHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware Interface for the CAN interface of the robot "Jonny"
+    </description>
+  </class>
+</library>
