@@ -1,8 +1,8 @@
-#include "jonny_motor_control.hpp"
+#include "jonny_robot_control.hpp"
 #include <rclcpp/logging.hpp>
 
-bool JonnyMotorControl::init() {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::init() {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   setupSender();
   setupReceiver();
 
@@ -16,7 +16,7 @@ bool JonnyMotorControl::init() {
 }
 
 int main() {
-  JonnyMotorControl motor_control = JonnyMotorControl();
+  JonnyRobotControl motor_control = JonnyRobotControl();
   motor_control.init();
   return 0;
 }

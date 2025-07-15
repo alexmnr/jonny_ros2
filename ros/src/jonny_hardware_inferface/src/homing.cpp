@@ -1,8 +1,8 @@
-#include "jonny_motor_control.hpp"
+#include "jonny_robot_control.hpp"
 #include <rclcpp/logging.hpp>
 
 ////////////////////// Homing BC Axis /////////////////////////
-void JonnyMotorControl::homeBCAxis(){
+void JonnyRobotControl::homeBCAxis(){
   rclcpp::Logger logger = rclcpp::get_logger("JonnyHomingControl");
   RCLCPP_INFO(logger, "B Axis: Starting Homing Procedure");
   setZero(5);
@@ -235,7 +235,7 @@ void JonnyMotorControl::homeBCAxis(){
 }
 
 ////////////////////// Homing A Axis /////////////////////////
-void JonnyMotorControl::homeAAxis(){
+void JonnyRobotControl::homeAAxis(){
   rclcpp::Logger logger = rclcpp::get_logger("JonnyHomingControl");
   int id = 3;
   int can_id = id + 1;
@@ -287,7 +287,7 @@ void JonnyMotorControl::homeAAxis(){
 }
 
 ////////////////////// Homing Z Axis /////////////////////////
-void JonnyMotorControl::homeZAxis(){
+void JonnyRobotControl::homeZAxis(){
   rclcpp::Logger logger = rclcpp::get_logger("JonnyHomingControl");
   int id = 2;
   int can_id = id + 1;
@@ -327,7 +327,7 @@ void JonnyMotorControl::homeZAxis(){
 }
 
 ////////////////////// Homing Y Axis /////////////////////////
-void JonnyMotorControl::homeYAxis(){
+void JonnyRobotControl::homeYAxis(){
   rclcpp::Logger logger = rclcpp::get_logger("JonnyHomingControl");
   int id = 1;
   int can_id = id + 1;
@@ -366,7 +366,7 @@ void JonnyMotorControl::homeYAxis(){
 }
 
 ////////////////////// Homing X Axis /////////////////////////
-void JonnyMotorControl::homeXAxis(){
+void JonnyRobotControl::homeXAxis(){
   rclcpp::Logger logger = rclcpp::get_logger("JonnyHomingControl");
   int id = 0;
   int can_id = id + 1;
@@ -421,7 +421,7 @@ void JonnyMotorControl::homeXAxis(){
 }
 
 ////////////////////// moveTillEndstop /////////////////////////
-bool JonnyMotorControl::moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, double limit, double speed, double acceleration) {
+bool JonnyRobotControl::moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, double limit, double speed, double acceleration) {
   rclcpp::Logger logger = rclcpp::get_logger("JonnyHomingControl");
 
   double max_position = limit*RobotConstants::AXIS_RATIO[motor_id-1];
@@ -452,8 +452,8 @@ bool JonnyMotorControl::moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, do
 }
 
 ////////////////////// read Endstop /////////////////////////
-bool JonnyMotorControl::readEndStop(uint8_t can_id, uint16_t timeout) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::readEndStop(uint8_t can_id, uint16_t timeout) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   std::vector<uint8_t> data = {CANCommands::READ_IO};
   sendData(can_id, data);
 

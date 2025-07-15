@@ -5,7 +5,7 @@
 #include "ros2_socketcan/socket_can_sender.hpp"
 #include "ros2_socketcan/socket_can_receiver.hpp"
 
-class JonnyMotorControl {
+class JonnyRobotControl {
   public:
     bool init();
 

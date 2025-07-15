@@ -33,7 +33,7 @@
 #include <jonny_interfaces/msg/joint_status.hpp>
 #include <jonny_interfaces/msg/hardware_status.hpp>
 
-#include "jonny_motor_control.hpp"
+#include "jonny_robot_control.hpp"
 
 using hardware_interface::return_type;
 

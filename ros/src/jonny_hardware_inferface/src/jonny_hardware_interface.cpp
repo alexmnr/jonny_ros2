@@ -1,4 +1,4 @@
-#include "jonny_can_interface.hpp"
+#include "jonny_hardware_interface.hpp"
 #include <rclcpp/logging.hpp>
 
 namespace jonny_hardware_interface {

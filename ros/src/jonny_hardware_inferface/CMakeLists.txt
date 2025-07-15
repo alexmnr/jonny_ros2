@@ -23,18 +23,18 @@ foreach(Dependency IN ITEMS ${Dependencies})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
-######### Jonny Motor Controll 
-add_executable(jonny_motor_control 
-  src/jonny_motor_control.cpp
+######### Jonny Robot Controll 
+add_executable(jonny_robot_control 
+  src/jonny_robot_control.cpp
   src/homing.cpp
   src/can.cpp
   src/joint_control.cpp
   src/motor_control.cpp)
-target_include_directories(jonny_motor_control PRIVATE include)
-ament_target_dependencies(jonny_motor_control PUBLIC ${Dependencies})
+target_include_directories(jonny_robot_control PRIVATE include)
+ament_target_dependencies(jonny_robot_control PUBLIC ${Dependencies})
 
 install(
-  TARGETS jonny_motor_control
+  TARGETS jonny_robot_control
   DESTINATION lib/${PROJECT_NAME})
 
 ######### Jonny Hardware Interface

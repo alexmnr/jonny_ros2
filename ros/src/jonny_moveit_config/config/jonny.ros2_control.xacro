@@ -7,10 +7,6 @@
             <hardware>
               <xacro:if value="${not use_fake_hardware}">
                 <plugin>jonny_hardware_interface/JonnyHardwareInterface</plugin>
-                <param name="loop_rate">30</param>
-                <param name="device">/dev/ttyACM0</param>
-                <param name="baud_rate">115200</param>
-                <param name="timeout_ms">1000</param>
                 <param name="homing">false</param>
                 <param name="debug">false</param>
               </xacro:if>
@@ -119,27 +115,6 @@
                 <param name="initial_value">0.0</param>
               </state_interface>
             </joint>
-            <joint name="jaw1">
-              <command_interface name="position">
-                <param name="min">6.2832</param>
-                <param name="max">6.2832</param>
-              </command_interface>
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-            </joint>
-            <joint name="jaw2">
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-            </joint>
-
           </ros2_control>
         </xacro:macro>
       </robot>

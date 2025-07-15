@@ -1,8 +1,8 @@
-#include "jonny_motor_control.hpp"
+#include "jonny_robot_control.hpp"
 #include <rclcpp/logging.hpp>
 
 ////////////////////// wait till stop /////////////////////////
-void JonnyMotorControl::waitTillStopped(uint8_t can_id) { 
+void JonnyRobotControl::waitTillStopped(uint8_t can_id) { 
   uint8_t status;
   while(1) {
     status = readStatus(can_id, 100);
@@ -13,15 +13,15 @@ void JonnyMotorControl::waitTillStopped(uint8_t can_id) {
 }
 
 ////////////////////// request Status /////////////////////////
-bool JonnyMotorControl::requestStatus(uint8_t can_id) { 
+bool JonnyRobotControl::requestStatus(uint8_t can_id) { 
   std::vector<uint8_t> data = {CANCommands::QUERY_MOTOR};
   bool check = sendData(can_id, data);
   return check;
 }
 
 ////////////////////// read Motor Position /////////////////////////
-uint8_t JonnyMotorControl::readStatus(uint8_t can_id, uint16_t timeout) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+uint8_t JonnyRobotControl::readStatus(uint8_t can_id, uint16_t timeout) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   bool check = requestStatus(can_id);
   if (!check) {
     RCLCPP_ERROR(logger, "Error requesting Status for Motor: %d", can_id);
@@ -40,15 +40,15 @@ uint8_t JonnyMotorControl::readStatus(uint8_t can_id, uint16_t timeout) {
 }
 
 ////////////////////// request Position /////////////////////////
-bool JonnyMotorControl::requestPosition(uint8_t can_id) { 
+bool JonnyRobotControl::requestPosition(uint8_t can_id) { 
   std::vector<uint8_t> data = {CANCommands::READ_ENCODER};
   bool check = sendData(can_id, data);
   return check;
 }
 
 ////////////////////// read Motor Position /////////////////////////
-double JonnyMotorControl::readMotorPosition(uint8_t can_id, uint16_t timeout) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+double JonnyRobotControl::readMotorPosition(uint8_t can_id, uint16_t timeout) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   bool check = requestPosition(can_id);
   if (!check) {
     RCLCPP_ERROR(logger, "Error requesting Position for Motor: %d", can_id);
@@ -80,8 +80,8 @@ double JonnyMotorControl::readMotorPosition(uint8_t can_id, uint16_t timeout) {
 }
 
 ////////////////////// set Absolute Motor Position /////////////////////////
-bool JonnyMotorControl::setAbsoluteMotorPosition(uint8_t can_id, double position, double speed, double acceleration) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::setAbsoluteMotorPosition(uint8_t can_id, double position, double speed, double acceleration) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
 
   // setting up values for can message
   int32_t position_value = static_cast<int32_t>(position);
@@ -107,8 +107,8 @@ bool JonnyMotorControl::setAbsoluteMotorPosition(uint8_t can_id, double position
 }
 
 ////////////////////// set Relative Motor Position /////////////////////////
-bool JonnyMotorControl::setRelativeMotorPosition(uint8_t can_id, double position, double speed, double acceleration) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::setRelativeMotorPosition(uint8_t can_id, double position, double speed, double acceleration) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
 
   // setting up values for can message
   int32_t position_value = static_cast<int32_t>(position);
@@ -134,8 +134,8 @@ bool JonnyMotorControl::setRelativeMotorPosition(uint8_t can_id, double position
 }
 
 ////////////////////// set Motor Velocity /////////////////////////
-bool JonnyMotorControl::setMotorVelocity(uint8_t can_id, double speed, double acceleration) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::setMotorVelocity(uint8_t can_id, double speed, double acceleration) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
 
   // setting up values for can message
   uint8_t direction = speed >= 0 ? 0x00 : 0x80;
@@ -156,7 +156,7 @@ bool JonnyMotorControl::setMotorVelocity(uint8_t can_id, double speed, double ac
 }
 
 ////////////////////// set Zero /////////////////////////
-bool JonnyMotorControl::setZero(uint8_t can_id) {
+bool JonnyRobotControl::setZero(uint8_t can_id) {
   std::vector<uint8_t> data = {CANCommands::SET_ZERO_POSITION};
   bool check = sendData(can_id, data);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -164,11 +164,11 @@ bool JonnyMotorControl::setZero(uint8_t can_id) {
 }
 
 ////////////////////// stop Motor in Absolute Mode /////////////////////////
-bool JonnyMotorControl::stopAbsoluteMotor(uint8_t can_id, double acceleration) {
+bool JonnyRobotControl::stopAbsoluteMotor(uint8_t can_id, double acceleration) {
   return setAbsoluteMotorPosition(can_id, 0, 0, acceleration);
 }
 
 ////////////////////// stop Motor in Relative Mode /////////////////////////
-bool JonnyMotorControl::stopRelativeMotor(uint8_t can_id, double acceleration) {
+bool JonnyRobotControl::stopRelativeMotor(uint8_t can_id, double acceleration) {
   return setRelativeMotorPosition(can_id, 0, 0, acceleration);
 }

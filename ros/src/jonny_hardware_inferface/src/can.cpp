@@ -1,9 +1,9 @@
-#include "jonny_motor_control.hpp"
+#include "jonny_robot_control.hpp"
 #include <rclcpp/logging.hpp>
 
 ////////////////////// send Data /////////////////////////
-bool JonnyMotorControl::sendData(uint8_t can_id, std::vector<uint8_t> data_vec) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::sendData(uint8_t can_id, std::vector<uint8_t> data_vec) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   // create can id
   drivers::socketcan::CanId canId = drivers::socketcan::CanId(can_id, 0, drivers::socketcan::FrameType::DATA, drivers::socketcan::StandardFrame);
   // creating crc
@@ -26,8 +26,8 @@ bool JonnyMotorControl::sendData(uint8_t can_id, std::vector<uint8_t> data_vec) 
 }
 
 ////////////////////// receive Data /////////////////////////
-std::tuple<uint8_t, uint8_t, std::vector<uint8_t>> JonnyMotorControl::receiveData(uint16_t timeout) {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+std::tuple<uint8_t, uint8_t, std::vector<uint8_t>> JonnyRobotControl::receiveData(uint16_t timeout) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   std::vector<uint8_t> response(8, 0); // Maximum data length for standard CAN frames/
   uint8_t id = 0;
   uint8_t length = 0;
@@ -45,8 +45,8 @@ std::tuple<uint8_t, uint8_t, std::vector<uint8_t>> JonnyMotorControl::receiveDat
 }
 
 ////////////////////// setup Sender /////////////////////////
-bool JonnyMotorControl::setupSender() {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::setupSender() {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   try {
     sender = std::make_unique<drivers::socketcan::SocketCanSender>("can0");
   } catch (const std::runtime_error & e) {
@@ -62,8 +62,8 @@ bool JonnyMotorControl::setupSender() {
 }
 
 ////////////////////// setup Receiver /////////////////////////
-bool JonnyMotorControl::setupReceiver() {
-  rclcpp::Logger logger = rclcpp::get_logger("JonnyMotorControl");
+bool JonnyRobotControl::setupReceiver() {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   // Initialize Receiver
   try {
     receiver = std::make_unique<drivers::socketcan::SocketCanReceiver>("can0", false);

@@ -1,8 +1,8 @@
-#include "jonny_motor_control.hpp"
+#include "jonny_robot_control.hpp"
 #include <rclcpp/logging.hpp>
 
 ////////////////////// set Normal (1-4) Joint Position (Relative)
-bool JonnyMotorControl::setRelativeXYZAJointPosition(uint8_t id, double position, double speed, double acceleration) {
+bool JonnyRobotControl::setRelativeXYZAJointPosition(uint8_t id, double position, double speed, double acceleration) {
   rclcpp::Logger logger = rclcpp::get_logger("JonnyJointInterface");
   if (id > 3) {
     RCLCPP_ERROR(logger, "Wrong Joint for XYZA Control!");
@@ -13,7 +13,7 @@ bool JonnyMotorControl::setRelativeXYZAJointPosition(uint8_t id, double position
 }
 
 ////////////////////// set Normal (1-4) Joint Position (Absolute)
-bool JonnyMotorControl::setAbsoluteXYZAJointPosition(uint8_t id, double position, double speed, double acceleration) {
+bool JonnyRobotControl::setAbsoluteXYZAJointPosition(uint8_t id, double position, double speed, double acceleration) {
   rclcpp::Logger logger = rclcpp::get_logger("JonnyJointInterface");
   if (id > 3) {
     RCLCPP_ERROR(logger, "Wrong Joint for XYZA Control!");
@@ -24,7 +24,7 @@ bool JonnyMotorControl::setAbsoluteXYZAJointPosition(uint8_t id, double position
 }
 
 ////////////////////// set BC (5-6) Joint Position (Relative)
-bool JonnyMotorControl::setRelativeBCJointPosition(double position[2], double speed, double acceleration) {
+bool JonnyRobotControl::setRelativeBCJointPosition(double position[2], double speed, double acceleration) {
   double motor_5_position = (position[0] - position[1]) * RobotConstants::AXIS_SET_INVERTED[4];
   double motor_6_position = (position[0] + position[1]) * RobotConstants::AXIS_SET_INVERTED[5];
   double motor_5_speed = speed;
@@ -35,7 +35,7 @@ bool JonnyMotorControl::setRelativeBCJointPosition(double position[2], double sp
 }
 
 ////////////////////// set BC (5-6) Joint Position (Absolute)
-bool JonnyMotorControl::setAbsoluteBCJointPosition(double position[2], double speed, double acceleration) {
+bool JonnyRobotControl::setAbsoluteBCJointPosition(double position[2], double speed, double acceleration) {
   double motor_5_position = (position[0] - position[1]) * RobotConstants::AXIS_SET_INVERTED[4];
   double motor_6_position = (position[0] + position[1]) * RobotConstants::AXIS_SET_INVERTED[5];
   double motor_5_speed = speed;

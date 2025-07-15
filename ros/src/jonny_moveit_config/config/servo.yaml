@@ -40,7 +40,7 @@ move_group_name:  arm  # Often 'manipulator' or 'arm'
 planning_frame: world  # The MoveIt planning frame. Often 'base_link' or 'world'
 
 ## Other frames
-ee_frame: Link_6_1  # The name of the end effector link, used to return the EE pose
+ee_frame: link_6  # The name of the end effector link, used to return the EE pose
 
 ## Configure handling of singularities and joint limits
 lower_singularity_threshold:  1000.0  # Start decelerating when the condition number hits this (close to singularity)
