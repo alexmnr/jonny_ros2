@@ -33,16 +33,16 @@
         <joint name="joint_5" value="0"/>
         <joint name="joint_6" value="0"/>
     </group_state>
-    <group_state name="watch" group="arm">
-        <joint name="joint_1" value="1.5708"/>
-        <joint name="joint_2" value="-0.40"/>
-        <joint name="joint_3" value="-0.10"/>
+    <group_state name="ready" group="arm">
+        <joint name="joint_1" value="0"/>
+        <joint name="joint_2" value="-0.45"/>
+        <joint name="joint_3" value="-1.90"/>
         <joint name="joint_4" value="0.0"/>
-        <joint name="joint_5" value="-0.7"/>
+        <joint name="joint_5" value="-0.4"/>
         <joint name="joint_6" value="-0.0"/>
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="end_effector" parent_link="link_6" group="arm" parent_group="arm"/>
+    <end_effector name="end_effector" parent_link="link_6" group="arm"/>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="world" type="fixed" parent_frame="world" child_link="link_0"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
