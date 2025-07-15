@@ -1,5 +1,5 @@
 # Overview
-Everything you need to controll the fully 3D-printed robotic arm "Jenny" using ros2 and moveit.
+Everything you need to controll the fully 3D-printed robotic arm "Jonny" using ros2 and moveit.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -25,9 +25,6 @@ Follow these instructions to use this repository.
 ## ROS2 
 To work with this repository, you need a working install of ros2 jazzy. Install it locally by following the instructions here: https://docs.ros.org/en/jazzy/Installation.html 
 
-Alternatively, you can use the docker image from https://github.com/alexmnr/jenny_docker
-First Option is **highly** recommended though.
-
 ## rosdep
 To automatically install all necessary dependencies, this projects uses rosdep (https://docs.ros.org/en/humble/Tutorials/Intermediate/Rosdep.html). 
 Install Rosdep using these commands:
@@ -42,11 +39,11 @@ rosdep update
 ## Dependencies
 Now, clone this repository:
 ```sh
-git clone https://github.com/alexmnr/jenny_ros2.git
+git clone https://github.com/alexmnr/jonny_ros2.git
 ```
 Use rosdep to install all dependencies automatically:
 ```sh
-cd jenny_ros2/ros && rosdep install --from-paths src -y --ignore-src
+cd jonny_ros2/ros && rosdep install --from-paths src -y --ignore-src
 ```
 
 ## Build
@@ -56,7 +53,7 @@ To finish the install, all packages provided have to be build.
 
 The build command has to be run in the \<path to repository\>/ros folder.
 ```sh
-cd jenny_ros2/ros
+cd jonny_ros2/ros
 ```
 Build Command:
 ```sh
@@ -83,7 +80,7 @@ sudo slcan_attach -f -s6 -o /dev/ttyACM0 && sudo slcand -o -s6 /dev/ttyACM0 can0
 There are multiple options available in this repository:
 ### Launch real robot with gui controll
 ```sh
-ros2 launch jenny_moveit_config real_robot.launch.py
+ros2 launch jonny_moveit_config real_robot.launch.py
 ```
 ### Launch real robot with command controll
 ```sh
