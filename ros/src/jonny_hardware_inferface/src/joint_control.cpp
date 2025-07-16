@@ -45,3 +45,12 @@ bool JonnyRobotControl::setAbsoluteBCJointPosition(double position[2], double sp
   return (check1 && check2);
 }
 
+////////////////////// get Joint Position
+double JonnyRobotControl::getJointPosition(uint8_t id, uint16_t timeout) {
+  if (id < 4) {
+    double motor_position = getMotorPosition(id+1, timeout);
+    double joint_position = motor_position * RobotConstants::AXIS_GET_INVERTED[id] / RobotConstants::AXIS_RATIO[id];
+    return joint_position;
+  }
+  return 0.0;
+}

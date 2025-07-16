@@ -22,7 +22,7 @@ void JonnyRobotControl::homeBCAxis(){
     setRelativeMotorPosition(5, -max_position, max_speed, 200);
     setRelativeMotorPosition(6, max_position, max_speed, 200);
     while(1) {
-      status = readStatus(5, 100);
+      status = getStatus(5, 100);
       output = readEndStop(6, 100);
       if (output) {
         stopRelativeMotor(5, 0);
@@ -65,7 +65,7 @@ void JonnyRobotControl::homeBCAxis(){
   setRelativeMotorPosition(5, -max_position, max_speed, 200);
   setRelativeMotorPosition(6, max_position, max_speed, 200);
   while(1) {
-    status = readStatus(5, 100);
+    status = getStatus(5, 100);
     output = readEndStop(6, 100);
     if (output) {
       stopRelativeMotor(5, 0);
@@ -79,14 +79,14 @@ void JonnyRobotControl::homeBCAxis(){
   }
   waitTillStopped(5);
   waitTillStopped(6);
-  double pos1 = readMotorPosition(5, 100);
+  double pos1 = getMotorPosition(5, 100);
   // approach from different reaction
   max_position = 40*RobotConstants::AXIS_RATIO[5];
   max_speed = 20*RobotConstants::AXIS_RATIO[5];
   setRelativeMotorPosition(5, -max_position, max_speed, 200);
   setRelativeMotorPosition(6, max_position, max_speed, 200);
   while(1) {
-    status = readStatus(5, 100);
+    status = getStatus(5, 100);
     output = readEndStop(6, 100);
     if (!output) {
       stopRelativeMotor(5, 0);
@@ -107,7 +107,7 @@ void JonnyRobotControl::homeBCAxis(){
   setRelativeMotorPosition(5, -max_position, max_speed, 200);
   setRelativeMotorPosition(6, max_position, max_speed, 200);
   while(1) {
-    status = readStatus(5, 100);
+    status = getStatus(5, 100);
     output = readEndStop(6, 100);
     if (output) {
       stopRelativeMotor(5, 0);
@@ -121,7 +121,7 @@ void JonnyRobotControl::homeBCAxis(){
   }
   waitTillStopped(5);
   waitTillStopped(6);
-  double pos2 = readMotorPosition(5, 100);
+  double pos2 = getMotorPosition(5, 100);
 
   // move
   double goal_position = abs((pos1 - pos2) / 2) + (RobotConstants::AXIS_ZERO_POSITION[4] * MotorConstants::DEG_TO_RAD);
@@ -144,7 +144,7 @@ void JonnyRobotControl::homeBCAxis(){
   setRelativeMotorPosition(5, max_position, max_speed, 200);
   setRelativeMotorPosition(6, max_position, max_speed, 200);
   while(1) {
-    status = readStatus(5, 100);
+    status = getStatus(5, 100);
     output = readEndStop(6, 100);
     if (output) {
       stopRelativeMotor(5, 0);
@@ -170,7 +170,7 @@ void JonnyRobotControl::homeBCAxis(){
   setRelativeMotorPosition(5, max_position, max_speed, 200);
   setRelativeMotorPosition(6, max_position, max_speed, 200);
   while(1) {
-    status = readStatus(5, 100);
+    status = getStatus(5, 100);
     output = readEndStop(6, 100);
     if (output) {
       stopRelativeMotor(5, 0);
@@ -182,14 +182,14 @@ void JonnyRobotControl::homeBCAxis(){
       return;
     }
   }
-  pos1 = readMotorPosition(5, 100);
+  pos1 = getMotorPosition(5, 100);
   // moving to other side
   max_position = 90*RobotConstants::AXIS_RATIO[5];
   max_speed = 20*RobotConstants::AXIS_RATIO[5];
   setRelativeMotorPosition(5, max_position, max_speed, 200);
   setRelativeMotorPosition(6, max_position, max_speed, 200);
   while(1) {
-    status = readStatus(5, 100);
+    status = getStatus(5, 100);
     output = readEndStop(6, 100);
     if (!output) {
       stopRelativeMotor(5, 0);
@@ -208,7 +208,7 @@ void JonnyRobotControl::homeBCAxis(){
   setRelativeMotorPosition(5, max_position, max_speed, 200);
   setRelativeMotorPosition(6, max_position, max_speed, 200);
   while(1) {
-    status = readStatus(5, 100);
+    status = getStatus(5, 100);
     output = readEndStop(6, 100);
     if (output) {
       stopRelativeMotor(5, 0);
@@ -220,7 +220,7 @@ void JonnyRobotControl::homeBCAxis(){
       return;
     }
   }
-  pos2 = readMotorPosition(5, 100);
+  pos2 = getMotorPosition(5, 100);
   // move
   goal_position = - abs((pos2 - pos1) / 2) - (RobotConstants::AXIS_ZERO_POSITION[5] * MotorConstants::DEG_TO_RAD);
   goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[5];
@@ -258,7 +258,7 @@ void JonnyRobotControl::homeAAxis(){
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on A Axis");
   }
-  double pos1 = readMotorPosition(can_id, 100);
+  double pos1 = getMotorPosition(can_id, 100);
 
   // seek
   RCLCPP_INFO(logger, "A Axis: Seeking 2. Endstop...");
@@ -272,7 +272,7 @@ void JonnyRobotControl::homeAAxis(){
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on A Axis");
   }
-  double pos2 = readMotorPosition(can_id, 100);
+  double pos2 = getMotorPosition(can_id, 100);
   
   // // move
   RCLCPP_INFO(logger, "A Axis: Moving to Zero Position...");
@@ -316,7 +316,7 @@ void JonnyRobotControl::homeZAxis(){
   }
   // move
   RCLCPP_INFO(logger, "Z Axis: Moving to Zero Position...");
-  double goal_position = - readMotorPosition(can_id, 100) + (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
+  double goal_position = - getMotorPosition(can_id, 100) + (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
   goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
   double goal_speed = 12 * RobotConstants::AXIS_RATIO[id];
 
@@ -355,7 +355,7 @@ void JonnyRobotControl::homeYAxis(){
   }
   // move
   RCLCPP_INFO(logger, "Y Axis: Moving to Zero Position...");
-  double goal_position = readMotorPosition(can_id, 100) - (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
+  double goal_position = getMotorPosition(can_id, 100) - (RobotConstants::AXIS_ZERO_POSITION[id] * MotorConstants::DEG_TO_RAD);
   goal_position = goal_position * MotorConstants::RAD_TO_DEG * RobotConstants::AXIS_RATIO[id];
   double goal_speed = 12 * RobotConstants::AXIS_RATIO[id];
 
@@ -393,7 +393,7 @@ void JonnyRobotControl::homeXAxis(){
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on X Axis");
   }
-  double pos1 = readMotorPosition(1, 100);
+  double pos1 = getMotorPosition(1, 100);
 
   // seek 2nd
   RCLCPP_INFO(logger, "X Axis: Seeking 2. Endstop...");
@@ -407,7 +407,7 @@ void JonnyRobotControl::homeXAxis(){
   if (check == false) {
     RCLCPP_ERROR(logger, "Failed to locate for endstop on X Axis");
   }
-  double pos2 = readMotorPosition(1, 100);
+  double pos2 = getMotorPosition(1, 100);
 
   // move
   RCLCPP_INFO(logger, "X Axis: Moving to Zero Position...");
@@ -436,7 +436,7 @@ bool JonnyRobotControl::moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, do
   bool output;
   uint8_t status;
   while(1) {
-    status = readStatus(motor_id, 100);
+    status = getStatus(motor_id, 100);
     output = readEndStop(endstop_id, 100);
     if (output != base_reading) {
       stopRelativeMotor(motor_id, 0);

@@ -89,6 +89,9 @@ protected:
   bool ready = false;
   Config config_;
 
+  // robot
+  JonnyRobotControl robot;
+
   // Hardware Status Logger
   rclcpp::Publisher<jonny_interfaces::msg::HardwareStatus>::SharedPtr pub_;
   rclcpp::Node::SharedPtr node_;
@@ -108,7 +111,7 @@ protected:
       {"position", {}}, {"velocity", {}}};
 
   // motor stats
-  // std::array<MotorStatus, 6> motor_stats;
+  std::array<MotorStatus, 6> motor_stats;
   // position buffers
   // std::array<double, 6> motor_position_buffer_;
 
@@ -137,9 +140,9 @@ protected:
   // bool requestPosition(uint8_t can_id);
   // bool requestStatus(uint8_t can_id);
 
-  // // loop stuff
-  // std::chrono::time_point<std::chrono::high_resolution_clock> current_loop_time_;
-  // std::chrono::time_point<std::chrono::high_resolution_clock> previous_loop_time_;
+  // loop stuff
+  std::chrono::time_point<std::chrono::high_resolution_clock> current_loop_time_;
+  std::chrono::time_point<std::chrono::high_resolution_clock> previous_loop_time_;
 
   // // debug functions
   // void printJointInfo(uint8_t id);

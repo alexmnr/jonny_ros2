@@ -5,7 +5,7 @@
 void JonnyRobotControl::waitTillStopped(uint8_t can_id) { 
   uint8_t status;
   while(1) {
-    status = readStatus(can_id, 100);
+    status = getStatus(can_id, 100);
     if (status == 1) {
       return;
     }
@@ -19,8 +19,8 @@ bool JonnyRobotControl::requestStatus(uint8_t can_id) {
   return check;
 }
 
-////////////////////// read Motor Position /////////////////////////
-uint8_t JonnyRobotControl::readStatus(uint8_t can_id, uint16_t timeout) {
+////////////////////// get status /////////////////////////
+uint8_t JonnyRobotControl::getStatus(uint8_t can_id, uint16_t timeout) {
   rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   bool check = requestStatus(can_id);
   if (!check) {
@@ -46,8 +46,8 @@ bool JonnyRobotControl::requestPosition(uint8_t can_id) {
   return check;
 }
 
-////////////////////// read Motor Position /////////////////////////
-double JonnyRobotControl::readMotorPosition(uint8_t can_id, uint16_t timeout) {
+////////////////////// get Motor Position /////////////////////////
+double JonnyRobotControl::getMotorPosition(uint8_t can_id, uint16_t timeout) {
   rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   bool check = requestPosition(can_id);
   if (!check) {
@@ -70,8 +70,6 @@ double JonnyRobotControl::readMotorPosition(uint8_t can_id, uint16_t timeout) {
       }
       // Convert addition value to degrees
       double position = (double)(value * MotorConstants::DEGREES_PER_REVOLUTION) / MotorConstants::ENCODER_STEPS;
-      position = (position * MotorConstants::DEG_TO_RAD);
-      position = (position / RobotConstants::AXIS_RATIO[id-1]);
       return position;
     }
   }

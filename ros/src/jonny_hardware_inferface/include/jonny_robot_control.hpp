@@ -7,12 +7,31 @@
 
 class JonnyRobotControl {
   public:
+    // setup
     bool init();
+    void homeAll();
+    bool check();
+    bool moveToZero();
+
+    // Joint Control (write)
+    bool setRelativeXYZAJointPosition(uint8_t id, double position, double speed, double acceleration);
+    bool setAbsoluteXYZAJointPosition(uint8_t id, double position, double speed, double acceleration);
+    bool setRelativeBCJointPosition(double position[2], double speed, double acceleration);
+    bool setAbsoluteBCJointPosition(double position[2], double speed, double acceleration);
+    // Joint Control (read)
+    double getJointPosition(uint8_t id, uint16_t timeout);
 
   private:
-    // functions
+    // can setup
     bool setupSender();
     bool setupReceiver();
+
+    // Homing
+    void homeXAxis();
+    void homeYAxis();
+    void homeZAxis();
+    void homeAAxis();
+    void homeBCAxis();
 
     // End Stop
     bool readEndStop(uint8_t can_id, uint16_t timeout);
@@ -22,32 +41,17 @@ class JonnyRobotControl {
     bool setRelativeMotorPosition(uint8_t can_id, double position, double speed, double acceleration);
     bool stopAbsoluteMotor(uint8_t can_id, double acceleration);
     bool stopRelativeMotor(uint8_t can_id, double acceleration);
-
-    // Get Position
-    bool requestPosition(uint8_t can_id);
-    double readMotorPosition(uint8_t can_id, uint16_t timeout);
-    
     // Motor Control by velocity
     bool setMotorVelocity(uint8_t can_id, double speed, double acceleration);
-
-    // Joint Control
-    bool setRelativeXYZAJointPosition(uint8_t id, double position, double speed, double acceleration);
-    bool setAbsoluteXYZAJointPosition(uint8_t id, double position, double speed, double acceleration);
-    bool setRelativeBCJointPosition(double position[2], double speed, double acceleration);
-    bool setAbsoluteBCJointPosition(double position[2], double speed, double acceleration);
-
+    // Get Motor Position
+    bool requestPosition(uint8_t can_id);
+    double getMotorPosition(uint8_t can_id, uint16_t timeout);
+    
     // Other
     bool setZero(uint8_t can_id);
     bool requestStatus(uint8_t can_id);
     void waitTillStopped(uint8_t can_id);
-    uint8_t readStatus(uint8_t can_id, uint16_t timeout);
-
-    // Homing
-    void homeXAxis();
-    void homeYAxis();
-    void homeZAxis();
-    void homeAAxis();
-    void homeBCAxis();
+    uint8_t getStatus(uint8_t can_id, uint16_t timeout);
 
     bool moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, double limit, double speed, double acceleration);
 
@@ -105,7 +109,7 @@ class JonnyRobotControl {
     struct RobotConstants {
       static constexpr double AXIS_ZERO_POSITION[6] = {-180, -91, 119, 0, 90, 78}; // Amount to move from endstop to zero
       static constexpr double AXIS_SET_INVERTED[6] = {1, 1, 1, -1, -1, 1}; // invert position when sending commands
-      static constexpr double AXIS_GET_INVERTED[6] = {1, 1, 1, -1, 1, 1}; // invert position when reading from motor
+      static constexpr double AXIS_GET_INVERTED[6] = {-1, -1, 1, -1, 1, 1}; // invert position when reading from motor
       static constexpr double AXIS_RATIO[6] = {14, 150, 150, 45, 36, 36}; // axis ratio
     };
 

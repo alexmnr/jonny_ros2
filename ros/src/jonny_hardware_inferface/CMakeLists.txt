@@ -42,6 +42,11 @@ add_library(
   jonny_hardware_interface
   SHARED
   src/jonny_hardware_interface.cpp
+  src/jonny_robot_control.cpp
+  src/homing.cpp
+  src/can.cpp
+  src/joint_control.cpp
+  src/motor_control.cpp
 )
 target_include_directories(jonny_hardware_interface PRIVATE include)
 ament_target_dependencies(jonny_hardware_interface PUBLIC ${Dependencies})
