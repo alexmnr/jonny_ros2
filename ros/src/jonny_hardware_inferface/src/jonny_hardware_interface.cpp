@@ -85,7 +85,7 @@ JonnyHardwareInterface::on_activate(const rclcpp_lifecycle::State &) {
     robot.homeAll();
   }
 
-  // robot.moveToZero();
+  robot.moveToZero();
 
   RCLCPP_INFO(logger, "Initialization finished!");
   ready = true;
@@ -111,6 +111,9 @@ return_type JonnyHardwareInterface::read(const rclcpp::Time & /*time*/,
   joint_position_[1] = robot.getJointPosition(1, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
   joint_position_[2] = robot.getJointPosition(2, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
   joint_position_[3] = robot.getJointPosition(3, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
+  // joint_position_[1] = joint_position_command_[1];
+  // joint_position_[2] = joint_position_command_[2];
+  // joint_position_[3] = joint_position_command_[3];
   joint_position_[4] = joint_position_command_[4];
   joint_position_[5] = joint_position_command_[5];
 
@@ -129,85 +132,62 @@ return_type JonnyHardwareInterface::write(const rclcpp::Time &,
   if (ready == false) {
     return return_type::OK;
   }
+
+  // calculate each motors speed
+  for (int i = 0; i < 6; i++) {
+    // find time difference
+    current_loop_time_ = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_loop_time_ - motor_stats[i].previous_time);
+    double milliseconds = duration.count();
+    // calculate speed
+    motor_stats[i].position = robot.getMotorPosition(i+1, 100);
+    double buffer;
+    buffer = (motor_stats[i].position - motor_stats[i].previous_position) / milliseconds;
+    buffer *= 1000; // to seconds
+    motor_stats[i].velocity = buffer;
+    // after calculations (for next time)
+    motor_stats[i].previous_position = motor_stats[i].position;
+    motor_stats[i].previous_time = current_loop_time_;
+  }
+
   // find time difference
-  // current_loop_time_ = std::chrono::high_resolution_clock::now();
-  // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_loop_time_ - previous_loop_time_);
-  // double milliseconds = duration.count();
+  current_loop_time_ = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_loop_time_ - previous_loop_time_);
+  double milliseconds = duration.count();
+  // joint 1-4
+  for (int i = 0; i < 4; i++) {
+    double position = joint_position_command_[i] * JonnyRobotControl::MotorConstants::RAD_TO_DEG;
+    double position_diff = abs(position - robot.getJointPosition(i, 100));
+    double speed = position_diff * (100 / milliseconds);
+    robot.setAbsoluteXYZAJointPosition(i, position, speed, 0);
+  }
+  // joint 5-6
+  // double BC_position[2] = {joint_position_command_[4] * JonnyRobotControl::MotorConstants::RAD_TO_DEG, joint_position_command_[5] * JonnyRobotControl::MotorConstants::RAD_TO_DEG};
+  // double position_diff = abs(position - robot.getJointPosition(i, 100));
+  // double speed = position_diff * (100 / milliseconds);
+  // robot.setAbsoluteBCJointPosition(BC_position, 30, 100);
 
-  // joint 1-6
-  // for (int i = 0; i < 1; i++) {
-    // double position = joint_position_command_[i] * JonnyRobotControl::MotorConstants::RAD_TO_DEG;
-    // double currentSpeed = abs(getJointVelocity(i));
-    // double addSpeed = abs(joint_position_command_[i] - getJointPosition(i)) * (1000 / milliseconds);
-    // double speed = currentSpeed + addSpeed;
-    // RCLCPP_INFO(logger, "current Speed: %f Add Speed: %f", currentSpeed, addSpeed);
-
-    // setJointPosition(i, position, speed, 0);
-  // }
   // save for next run
-  // previous_loop_time_ = current_loop_time_;
+  previous_loop_time_ = current_loop_time_;
   
-  // // request position for next run
-  // bool check;
-  // for (int can_id = 4; can_id < 5; can_id++) {
-  //   if (motor_stats[can_id - 1].ready) {
-  //     check = requestPosition(can_id);
-  //     if (!check) {
-  //       RCLCPP_ERROR(logger, "Failed to request Position from motor with can_id: %d" , can_id);
-  //     }
-  //   }
-  // }
-
   return return_type::OK;
 }
 
-// ////////////////////// request Position
-// bool JonnyHardwareInterface::requestPosition(uint8_t can_id) { 
-//   std::vector<uint8_t> data = {CANCommands::READ_ENCODER};
-//   bool check = sendData(can_id, data);
-//   return check;
-// }
-
-// ////////////////////// read Position
-// double JonnyHardwareInterface::getJointPosition(uint8_t id) {
-//   double joint_position;
-//   // if (id == 4) {
-//   //   joint_position = (0.5 * (motor_position_buffer_[4] - motor_position_buffer_[5]));
-//   //   joint_position = (joint_position * MotorConstants::DEG_TO_RAD);
-//   //   joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
-//   //   joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
-//   // } else if (id == 5) {
-//   //   joint_position = (0.5 * (motor_position_buffer_[5] + motor_position_buffer_[4]));
-//   //   joint_position = (joint_position * MotorConstants::DEG_TO_RAD);
-//   //   joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
-//   //   joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
-//   // } else {
-//   joint_position = (motor_stats[id].position * MotorConstants::DEG_TO_RAD);
-//   joint_position = (joint_position * RobotConstants::AXIS_GET_INVERTED[id]);
-//   joint_position = (joint_position / RobotConstants::AXIS_RATIO[id]);
-//   // }
-
-//   return joint_position;
-// }
-
-// ////////////////////// read Speed
-// double JonnyHardwareInterface::getJointVelocity(uint8_t id) {
-//   double joint_velocity;
-//   // if (id == 4) {
-//   //   joint_velocity = (0.5 * (motor_velocity_buffer_[5] + motor_velocity_buffer_[4]));
-//   //   joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
-//   //   joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
-//   // } else if (id == 5) {
-//   //   joint_velocity = (0.5 * (motor_velocity_buffer_[5] + motor_velocity_buffer_[4]));
-//   //   joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
-//   //   joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
-//   // } else {
-//   joint_velocity = motor_stats[id].velocity;
-//   joint_velocity = (joint_velocity * RobotConstants::AXIS_GET_INVERTED[id]);
-//   joint_velocity = (joint_velocity / RobotConstants::AXIS_RATIO[id]);
-//   // }
-//   return joint_velocity;
-// }
+////////////////////// calculate Joint Velocity
+double JonnyHardwareInterface::getJointVelocity(uint8_t id) {
+  double joint_velocity;
+  if (id == 4) {
+    joint_velocity = (0.5 * (motor_stats[5].velocity + motor_stats[4].velocity));
+    joint_velocity = (joint_velocity / JonnyRobotControl::RobotConstants::AXIS_RATIO[id]);
+  } else if (id == 5) {
+    joint_velocity = (0.5 * (motor_stats[5].velocity - motor_stats[4].velocity));
+    joint_velocity = (joint_velocity / JonnyRobotControl::RobotConstants::AXIS_RATIO[id]);
+  } else {
+    joint_velocity = motor_stats[id].velocity;
+    joint_velocity = (joint_velocity / JonnyRobotControl::RobotConstants::AXIS_RATIO[id]);
+  }
+  return joint_velocity;
+}
 
 // ////////////////////// handle responses
 // void JonnyHardwareInterface::handleCANResponses() {

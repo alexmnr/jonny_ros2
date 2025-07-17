@@ -20,6 +20,16 @@ class JonnyRobotControl {
     bool setAbsoluteBCJointPosition(double position[2], double speed, double acceleration);
     // Joint Control (read)
     double getJointPosition(uint8_t id, uint16_t timeout);
+    double getJointVelocity(uint8_t id, double motor_velocity);
+    // Get Motor Position
+    bool requestPosition(uint8_t can_id);
+    double getMotorPosition(uint8_t can_id, uint16_t timeout);
+
+    // Other
+    bool setZero(uint8_t can_id);
+    bool requestStatus(uint8_t can_id);
+    void waitTillStopped(uint8_t can_id);
+    uint8_t getStatus(uint8_t can_id, uint16_t timeout);
 
   private:
     // can setup
@@ -43,15 +53,7 @@ class JonnyRobotControl {
     bool stopRelativeMotor(uint8_t can_id, double acceleration);
     // Motor Control by velocity
     bool setMotorVelocity(uint8_t can_id, double speed, double acceleration);
-    // Get Motor Position
-    bool requestPosition(uint8_t can_id);
-    double getMotorPosition(uint8_t can_id, uint16_t timeout);
     
-    // Other
-    bool setZero(uint8_t can_id);
-    bool requestStatus(uint8_t can_id);
-    void waitTillStopped(uint8_t can_id);
-    uint8_t getStatus(uint8_t can_id, uint16_t timeout);
 
     bool moveTillEndstop(uint8_t motor_id, uint8_t endstop_id, double limit, double speed, double acceleration);
 

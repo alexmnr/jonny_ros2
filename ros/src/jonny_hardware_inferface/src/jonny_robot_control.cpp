@@ -15,8 +15,8 @@ bool JonnyRobotControl::init() {
   // setAbsoluteXYZAJointPosition(1, -30, 20, 100);
   // setAbsoluteXYZAJointPosition(2, -100, 20, 100);
   // setAbsoluteXYZAJointPosition(3, -45, 20, 100);
-  // double BC_position[2] = {-40, 0};
-  // setAbsoluteBCJointPosition(BC_position, 20, 100);
+  double BC_position[2] = {0, 0};
+  setAbsoluteBCJointPosition(BC_position, 20, 100);
 
   return true;
 }
@@ -46,7 +46,7 @@ bool JonnyRobotControl::moveToZero() {
   rclcpp::Logger logger = rclcpp::get_logger("JonnyRobotControl");
   RCLCPP_INFO(logger, "Zeroing all Motors!");
   for (int i = 1; i < 7; i++) {
-    setAbsoluteMotorPosition(i, 0, 10*RobotConstants::AXIS_RATIO[i-1], 100);
+    setAbsoluteMotorPosition(i, 0, 15*RobotConstants::AXIS_RATIO[i-1], 20);
   }
   uint8_t status;
   bool done = false;
@@ -98,7 +98,7 @@ void JonnyRobotControl::homeAll() {
 int main() {
   JonnyRobotControl robot = JonnyRobotControl();
   robot.init();
-  robot.homeAll();
+  // robot.homeAll();
   // robot.moveToZero();
   return 0;
 }

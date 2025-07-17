@@ -47,10 +47,26 @@ bool JonnyRobotControl::setAbsoluteBCJointPosition(double position[2], double sp
 
 ////////////////////// get Joint Position
 double JonnyRobotControl::getJointPosition(uint8_t id, uint16_t timeout) {
+  rclcpp::Logger logger = rclcpp::get_logger("JonnyJointInterface");
   if (id < 4) {
     double motor_position = getMotorPosition(id+1, timeout);
     double joint_position = motor_position / RobotConstants::AXIS_RATIO[id];
     return joint_position;
+  } else if (id == 4) {
+    double motor_position_5 = getMotorPosition(5, timeout);
+    double motor_position_6 = getMotorPosition(6, timeout);
+    double joint_position = (0.5 * (motor_position_6 + motor_position_5));
+    joint_position /= RobotConstants::AXIS_RATIO[4];
+    return joint_position;
+  } else if (id == 5) {
+    double motor_position_5 = getMotorPosition(5, timeout);
+    double motor_position_6 = getMotorPosition(6, timeout);
+    double joint_position = (0.5 * (motor_position_6 - motor_position_5));
+    joint_position /= RobotConstants::AXIS_RATIO[4];
+    return joint_position;
+  } else {
+    RCLCPP_ERROR(logger, "Wrong Joint ID!");
+    return 0.0;
   }
-  return 0.0;
 }
+

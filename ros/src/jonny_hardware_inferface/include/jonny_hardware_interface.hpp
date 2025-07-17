@@ -112,6 +112,7 @@ protected:
 
   // motor stats
   std::array<MotorStatus, 6> motor_stats;
+  double getJointVelocity(uint8_t id);
   // position buffers
   // std::array<double, 6> motor_position_buffer_;
 
