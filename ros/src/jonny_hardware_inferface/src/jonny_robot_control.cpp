@@ -6,8 +6,8 @@ bool JonnyRobotControl::init() {
   setupSender();
   setupReceiver();
 
-  // double BC_position[2] = {-40, 0};
-  // setAbsoluteBCJointPosition(BC_position, 20, 100);
+  // double BC_position[2] = {-90, 00};
+  // setAbsoluteBCJointPosition(BC_position, 30, 100);
   // setAbsoluteXYZAJointPosition(0, 0, 20, 100);
   // setAbsoluteXYZAJointPosition(1, 0, 20, 100);
   // setAbsoluteXYZAJointPosition(2, 0, 20, 100);
@@ -73,24 +73,6 @@ bool JonnyRobotControl::moveToZero() {
       return true;
     }
   }
-    // calculate abs sum to check if all zerod
-  //   sum = 0;
-  //   for (int a = 0; a < 6; a++) {
-  //     sum += abs(motor_stats[a].position);
-  //   }
-  //   // break out if done
-  //   if (sum < 0.1) {
-  //     timeout = false;
-  //     break;
-  //   }
-  // }
-  // // check if timeout
-  // if (timeout) {
-  //   RCLCPP_ERROR(logger, "Failed to zero Motors in time");
-  //   return CallbackReturn::FAILURE;
-  // }
-  //
-
   return true;
 
 }
@@ -116,7 +98,7 @@ void JonnyRobotControl::homeAll() {
 int main() {
   JonnyRobotControl robot = JonnyRobotControl();
   robot.init();
-  // robot.homeAll();
+  robot.homeAll();
   // robot.moveToZero();
   return 0;
 }

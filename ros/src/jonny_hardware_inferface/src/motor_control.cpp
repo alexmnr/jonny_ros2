@@ -69,7 +69,7 @@ double JonnyRobotControl::getMotorPosition(uint8_t can_id, uint16_t timeout) {
         value |= 0xFFFF000000000000;  // Sign-extend to 64 bits
       }
       // Convert addition value to degrees
-      double position = (double)(value * MotorConstants::DEGREES_PER_REVOLUTION) / MotorConstants::ENCODER_STEPS;
+      double position = (double)(value * MotorConstants::DEGREES_PER_REVOLUTION) / MotorConstants::ENCODER_STEPS * RobotConstants::MOTOR_GET_INVERTED[id-1];
       return position;
     }
   }
@@ -84,6 +84,7 @@ bool JonnyRobotControl::setAbsoluteMotorPosition(uint8_t can_id, double position
   // setting up values for can message
   int32_t position_value = static_cast<int32_t>(position);
   position_value *= MotorConstants::ENCODER_STEPS;
+  position_value *= RobotConstants::MOTOR_SET_INVERTED[can_id-1];
   position_value /= MotorConstants::DEGREES_PER_REVOLUTION;
   uint16_t speed_value = static_cast<uint16_t>(std::clamp(speed*MotorConstants::DEGPS_TO_RPM, 0.0, 3000.0));
   uint8_t acceleration_value = static_cast<uint8_t>(std::clamp(acceleration, 0.0, 255.0));
@@ -111,6 +112,7 @@ bool JonnyRobotControl::setRelativeMotorPosition(uint8_t can_id, double position
   // setting up values for can message
   int32_t position_value = static_cast<int32_t>(position);
   position_value *= MotorConstants::ENCODER_STEPS;
+  position_value *= RobotConstants::MOTOR_SET_INVERTED[can_id-1];
   position_value /= MotorConstants::DEGREES_PER_REVOLUTION;
   uint16_t speed_value = static_cast<uint16_t>(std::clamp(speed*MotorConstants::DEGPS_TO_RPM, 0.0, 3000.0));
   uint8_t acceleration_value = static_cast<uint8_t>(std::clamp(acceleration, 0.0, 255.0));
