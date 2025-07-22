@@ -113,6 +113,7 @@ protected:
   // motor stats
   std::array<MotorStatus, 6> motor_stats;
   double getJointVelocity(uint8_t id);
+  double getJointPosition(uint8_t id);
   // position buffers
   // std::array<double, 6> motor_position_buffer_;
 
@@ -145,9 +146,9 @@ protected:
   std::chrono::time_point<std::chrono::high_resolution_clock> current_loop_time_;
   std::chrono::time_point<std::chrono::high_resolution_clock> previous_loop_time_;
 
-  // // debug functions
-  // void printJointInfo(uint8_t id);
-  // void publishHardwareInfo();
+  // debug functions
+  void printJointInfo(uint8_t id);
+  void publishHardwareInfo();
 };
 } // namespace jonny_hardware_interface
 
