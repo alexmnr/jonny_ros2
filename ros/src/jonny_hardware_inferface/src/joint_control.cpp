@@ -27,21 +27,61 @@ bool JonnyRobotControl::setAbsoluteXYZAJointPosition(uint8_t id, double position
 bool JonnyRobotControl::setRelativeBCJointPosition(double position[2], double speed, double acceleration) {
   double motor_5_position = (position[0] - position[1]);
   double motor_6_position = (position[0] + position[1]);
-  double motor_5_speed = speed;
-  double motor_6_speed = speed;
-  bool check1 = setRelativeMotorPosition(5, (motor_5_position * RobotConstants::AXIS_RATIO[4]), (motor_5_speed * RobotConstants::AXIS_RATIO[4]), acceleration);
-  bool check2 = setRelativeMotorPosition(6, (motor_6_position * RobotConstants::AXIS_RATIO[5]), (motor_6_speed * RobotConstants::AXIS_RATIO[5]), acceleration);
+  double motor_5_speed;
+  double motor_6_speed;
+  double motor_5_acceleration;
+  double motor_6_acceleration;
+  if (abs(motor_5_position) > abs(motor_6_position)) {
+    motor_5_speed = speed;
+    motor_6_speed = speed * (motor_6_position / motor_5_position);
+    motor_5_acceleration = acceleration;
+    motor_6_acceleration = acceleration * (motor_6_position / motor_5_position);
+  } else if (abs(motor_6_position) > abs(motor_5_position)) {
+    motor_6_speed = speed;
+    motor_5_speed = speed * (motor_5_position / motor_6_position);
+    motor_6_acceleration = acceleration;
+    motor_5_acceleration = acceleration * (motor_5_position / motor_6_position);
+  } else {
+    motor_5_speed = speed;
+    motor_6_speed = speed;
+    motor_5_acceleration = acceleration;
+    motor_6_acceleration = acceleration;
+  }
+  bool check1 = setRelativeMotorPosition(5, (motor_5_position * RobotConstants::AXIS_RATIO[4]), (motor_5_speed * RobotConstants::AXIS_RATIO[4]), motor_5_acceleration);
+  bool check2 = setRelativeMotorPosition(6, (motor_6_position * RobotConstants::AXIS_RATIO[5]), (motor_6_speed * RobotConstants::AXIS_RATIO[5]), motor_6_acceleration);
   return (check1 && check2);
 }
 
 ////////////////////// set BC (5-6) Joint Position (Absolute)
 bool JonnyRobotControl::setAbsoluteBCJointPosition(double position[2], double speed, double acceleration) {
-  double motor_5_position = (position[0] - position[1]);
-  double motor_6_position = (position[0] + position[1]);
-  double motor_5_speed = speed;
-  double motor_6_speed = speed;
-  bool check1 = setAbsoluteMotorPosition(5, (motor_5_position * RobotConstants::AXIS_RATIO[4]), (motor_5_speed * RobotConstants::AXIS_RATIO[4]), acceleration);
-  bool check2 = setAbsoluteMotorPosition(6, (motor_6_position * RobotConstants::AXIS_RATIO[5]), (motor_6_speed * RobotConstants::AXIS_RATIO[5]), acceleration);
+  double current_motor_5_position = getMotorPosition(5, 100);
+  double current_motor_6_position = getMotorPosition(6, 100);
+  double motor_5_position = (position[0] - position[1]) * RobotConstants::AXIS_RATIO[4];
+  double motor_6_position = (position[0] + position[1]) * RobotConstants::AXIS_RATIO[5];
+  double motor_5_diff = abs(motor_5_position - current_motor_5_position);
+  double motor_6_diff = abs(motor_6_position - current_motor_6_position);
+  double motor_5_speed;
+  double motor_6_speed;
+  double motor_5_acceleration;
+  double motor_6_acceleration;
+  if (motor_5_diff > motor_6_diff) {
+    motor_5_speed = speed;
+    motor_6_speed = speed * (motor_6_diff / motor_5_diff);
+    motor_5_acceleration = acceleration;
+    motor_6_acceleration = acceleration * (motor_6_diff / motor_5_diff);
+  } else if (motor_6_diff > motor_5_diff) {
+    motor_6_speed = speed;
+    motor_5_speed = speed * (motor_5_diff / motor_6_diff);
+    motor_6_acceleration = acceleration;
+    motor_5_acceleration = acceleration * (motor_5_diff / motor_6_diff);
+  } else {
+    motor_5_speed = speed;
+    motor_6_speed = speed;
+    motor_5_acceleration = acceleration;
+    motor_6_acceleration = acceleration;
+  }
+  bool check1 = setAbsoluteMotorPosition(5, motor_5_position, (motor_5_speed * RobotConstants::AXIS_RATIO[4]), motor_5_acceleration);
+  bool check2 = setAbsoluteMotorPosition(6, motor_6_position, (motor_6_speed * RobotConstants::AXIS_RATIO[5]), motor_6_acceleration);
   return (check1 && check2);
 }
 

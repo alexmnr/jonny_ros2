@@ -111,11 +111,14 @@ return_type JonnyHardwareInterface::read(const rclcpp::Time & /*time*/,
   joint_position_[1] = robot.getJointPosition(1, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
   joint_position_[2] = robot.getJointPosition(2, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
   joint_position_[3] = robot.getJointPosition(3, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
+  joint_position_[4] = robot.getJointPosition(4, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
+  joint_position_[5] = robot.getJointPosition(5, 100) * JonnyRobotControl::MotorConstants::DEG_TO_RAD;
+  // joint_position_[0] = joint_position_command_[0];
   // joint_position_[1] = joint_position_command_[1];
   // joint_position_[2] = joint_position_command_[2];
   // joint_position_[3] = joint_position_command_[3];
-  joint_position_[4] = joint_position_command_[4];
-  joint_position_[5] = joint_position_command_[5];
+  // joint_position_[4] = joint_position_command_[4];
+  // joint_position_[5] = joint_position_command_[5];
 
   // publish Hardware Info Topic
   // publishHardwareInfo();
@@ -162,10 +165,18 @@ return_type JonnyHardwareInterface::write(const rclcpp::Time &,
     robot.setAbsoluteXYZAJointPosition(i, position, speed, 0);
   }
   // joint 5-6
-  // double BC_position[2] = {joint_position_command_[4] * JonnyRobotControl::MotorConstants::RAD_TO_DEG, joint_position_command_[5] * JonnyRobotControl::MotorConstants::RAD_TO_DEG};
-  // double position_diff = abs(position - robot.getJointPosition(i, 100));
-  // double speed = position_diff * (100 / milliseconds);
-  // robot.setAbsoluteBCJointPosition(BC_position, 30, 100);
+  double position_5 = joint_position_command_[4] * JonnyRobotControl::MotorConstants::RAD_TO_DEG;
+  double position_diff_5 = abs(position_5 - robot.getJointPosition(4, 100));
+  double speed_5 = position_diff_5 * (100 / milliseconds);
+  double position_6 = joint_position_command_[5] * JonnyRobotControl::MotorConstants::RAD_TO_DEG;
+  double position_diff_6 = abs(position_6 - robot.getJointPosition(5, 100));
+  double speed_6 = position_diff_6 * (100 / milliseconds);
+  double BC_position[2] = {position_5, position_6};
+  if (speed_5 > speed_6) {
+    robot.setAbsoluteBCJointPosition(BC_position, speed_5, 0);
+  } else {
+    robot.setAbsoluteBCJointPosition(BC_position, speed_6, 0);
+  }
 
   // save for next run
   previous_loop_time_ = current_loop_time_;

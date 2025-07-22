@@ -6,17 +6,20 @@ bool JonnyRobotControl::init() {
   setupSender();
   setupReceiver();
 
-  // double BC_position[2] = {-90, 00};
-  // setAbsoluteBCJointPosition(BC_position, 30, 100);
+
   // setAbsoluteXYZAJointPosition(0, 0, 20, 100);
   // setAbsoluteXYZAJointPosition(1, 0, 20, 100);
   // setAbsoluteXYZAJointPosition(2, 0, 20, 100);
+  // setAbsoluteXYZAJointPosition(3, 0, 20, 100);
+  // double BC_position[2] = {0, 0};
+  // setAbsoluteBCJointPosition(BC_position, 40, 100);
+  
   // setAbsoluteXYZAJointPosition(0, -90, 10, 100);
   // setAbsoluteXYZAJointPosition(1, -30, 20, 100);
   // setAbsoluteXYZAJointPosition(2, -100, 20, 100);
   // setAbsoluteXYZAJointPosition(3, -45, 20, 100);
-  double BC_position[2] = {0, 0};
-  setAbsoluteBCJointPosition(BC_position, 20, 100);
+  // double BC_position[2] = {0, 0};
+  // setAbsoluteBCJointPosition(BC_position, 40, 100);
 
   return true;
 }
