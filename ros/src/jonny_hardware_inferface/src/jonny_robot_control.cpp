@@ -6,21 +6,6 @@ bool JonnyRobotControl::init() {
   setupSender();
   setupReceiver();
 
-
-  // setAbsoluteXYZAJointPosition(0, 0, 20, 100);
-  // setAbsoluteXYZAJointPosition(1, 0, 20, 100);
-  // setAbsoluteXYZAJointPosition(2, 0, 20, 100);
-  // setAbsoluteXYZAJointPosition(3, 0, 20, 100);
-  // double BC_position[2] = {0, 0};
-  // setAbsoluteBCJointPosition(BC_position, 40, 100);
-  
-  // setAbsoluteXYZAJointPosition(0, -90, 10, 100);
-  // setAbsoluteXYZAJointPosition(1, -30, 20, 100);
-  // setAbsoluteXYZAJointPosition(2, -100, 20, 100);
-  // setAbsoluteXYZAJointPosition(3, -45, 20, 100);
-  // double BC_position[2] = {0, 0};
-  // setAbsoluteBCJointPosition(BC_position, 40, 100);
-
   return true;
 }
 
@@ -86,22 +71,11 @@ void JonnyRobotControl::homeAll() {
   homeZAxis();
   homeAAxis();
   homeBCAxis();
-  // std::thread tX(&JonnyRobotControl::homeXAxis, this);
-  // std::thread tY(&JonnyRobotControl::homeYAxis, this);
-  // std::thread tZ(&JonnyRobotControl::homeZAxis, this);
-  // std::thread tA(&JonnyRobotControl::homeAAxis, this);
-  // std::thread tBC(&JonnyRobotControl::homeBCAxis, this);
-  // tX.join();
-  // tY.join();
-  // tZ.join();
-  // tA.join();
-  // tBC.join();
 }
 
 int main() {
   JonnyRobotControl robot = JonnyRobotControl();
   robot.init();
-  // robot.homeAll();
-  // robot.moveToZero();
+  robot.homeAll();
   return 0;
 }

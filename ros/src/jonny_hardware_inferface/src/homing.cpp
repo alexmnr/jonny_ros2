@@ -403,8 +403,6 @@ void JonnyRobotControl::homeXAxis(){
   }
   double pos2 = getMotorPosition(1, 100);
 
-  RCLCPP_INFO(logger, "Pos1: %f Pos2: %f", pos1, pos2);
-
   // // move
   RCLCPP_INFO(logger, "X Axis: Moving to Zero Position...");
   double goal_position = pos1 + ((1.0/2.0) * (pos2 - pos1));
